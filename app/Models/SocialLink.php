@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class SocialLink extends Model
 {
-        protected $table = 'social_links';
- 
+    use HasFactory;
+
+    protected $table = 'social_links';
+
     protected $fillable = [
         'platform',
         'handle',
@@ -15,13 +18,13 @@ class SocialLink extends Model
         'description',
         'sort_order',
     ];
- 
+
     protected $casts = [
         'sort_order' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
- 
+
     /**
      * Scope untuk mengurutkan berdasarkan sort_order
      */
@@ -29,7 +32,7 @@ class SocialLink extends Model
     {
         return $query->orderBy('sort_order', 'asc');
     }
- 
+
     /**
      * Scope untuk mendapatkan social links aktif
      */
