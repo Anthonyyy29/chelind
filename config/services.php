@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'football_data' => [
+        'key' => env('FOOTBALL_DATA_API_KEY'),
+        'team_id' => env('FOOTBALL_DATA_TEAM_ID', 61), // 61 = Chelsea FC
+    ],
+
 ];
