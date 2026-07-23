@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Player;
 use Illuminate\Database\Seeder;
 
 class PlayerSeeder extends Seeder
