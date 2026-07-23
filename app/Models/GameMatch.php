@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\GameMatchFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class GameMatch extends Model
 {
+    /** @use HasFactory<GameMatchFactory> */
     use HasFactory;
 
     protected $table = 'matches';
@@ -31,16 +34,22 @@ class GameMatch extends Model
 
     /**
      * Scope untuk jadwal yang belum dimainkan, urut laga terdekat dulu
+     *
+     * @param  Builder<GameMatch>  $query
+     * @return Builder<GameMatch>
      */
-    public function scopeScheduled($query)
+    public function scopeScheduled(Builder $query): Builder
     {
         return $query->where('status', 'SCHEDULED')->orderBy('kickoff_at', 'asc');
     }
 
     /**
      * Scope untuk hasil pertandingan, urut laga terbaru dulu
+     *
+     * @param  Builder<GameMatch>  $query
+     * @return Builder<GameMatch>
      */
-    public function scopeFinished($query)
+    public function scopeFinished(Builder $query): Builder
     {
         return $query->where('status', 'FINISHED')->orderBy('kickoff_at', 'desc');
     }

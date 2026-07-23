@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\SocialLinkFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class SocialLink extends Model
 {
+    /** @use HasFactory<SocialLinkFactory> */
     use HasFactory;
 
     protected $table = 'social_links';
@@ -27,16 +30,22 @@ class SocialLink extends Model
 
     /**
      * Scope untuk mengurutkan berdasarkan sort_order
+     *
+     * @param  Builder<SocialLink>  $query
+     * @return Builder<SocialLink>
      */
-    public function scopeOrdered($query)
+    public function scopeOrdered(Builder $query): Builder
     {
         return $query->orderBy('sort_order', 'asc');
     }
 
     /**
      * Scope untuk mendapatkan social links aktif
+     *
+     * @param  Builder<SocialLink>  $query
+     * @return Builder<SocialLink>
      */
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->ordered();
     }

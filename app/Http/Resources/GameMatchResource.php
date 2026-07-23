@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\GameMatch;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -12,15 +13,18 @@ class GameMatchResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        /** @var GameMatch $match */
+        $match = $this->resource;
+
         return [
-            'id' => $this->id,
-            'competition' => $this->competition,
-            'opponent' => $this->opponent,
-            'is_home' => $this->is_home,
-            'kickoff_at' => $this->kickoff_at,
-            'status' => $this->status,
-            'score_home' => $this->score_home,
-            'score_away' => $this->score_away,
+            'id' => $match->id,
+            'competition' => $match->competition,
+            'opponent' => $match->opponent,
+            'is_home' => $match->is_home,
+            'kickoff_at' => $match->kickoff_at,
+            'status' => $match->status,
+            'score_home' => $match->score_home,
+            'score_away' => $match->score_away,
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Article;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
@@ -13,24 +14,27 @@ class ArticleResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        /** @var Article $article */
+        $article = $this->resource;
+
         return [
-            'id' => $this->id,
-            'title' => $this->title,
-            'slug' => $this->slug,
-            'excerpt' => $this->excerpt,
-            'body' => $this->body,
-            'cover_image' => $this->cover_image ? Storage::disk('public')->url($this->cover_image) : null,
+            'id' => $article->id,
+            'title' => $article->title,
+            'slug' => $article->slug,
+            'excerpt' => $article->excerpt,
+            'body' => $article->body,
+            'cover_image' => $article->cover_image ? Storage::disk('public')->url($article->cover_image) : null,
             'category' => new CategoryResource($this->whenLoaded('category')),
             'author' => $this->whenLoaded('author', fn () => [
-                'id' => $this->author->id,
-                'name' => $this->author->name,
+                'id' => $article->author->id,
+                'name' => $article->author->name,
             ]),
-            'is_featured' => $this->is_featured,
-            'status' => $this->status,
-            'published_at' => $this->published_at,
-            'views' => $this->views,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'is_featured' => $article->is_featured,
+            'status' => $article->status,
+            'published_at' => $article->published_at,
+            'views' => $article->views,
+            'created_at' => $article->created_at,
+            'updated_at' => $article->updated_at,
         ];
     }
 }
