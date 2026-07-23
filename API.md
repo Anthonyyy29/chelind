@@ -4,7 +4,7 @@ Dokumen ini untuk Ali (frontend). Semua endpoint di bawah **satu domain** dengan
 React SPA (same-origin, tanpa CORS). Base path: `/api`.
 
 Auth **bukan** Sanctum — session cookie native Laravel. Alasan & detail keputusan
-ada di `petunjuk1.md` §7.
+ada di `../petunjuk1.md` §7.
 
 ---
 
@@ -132,6 +132,11 @@ Default = jadwal (`status=SCHEDULED`, urut kickoff terdekat dulu).
              "status": "SCHEDULED", "score_home": null, "score_away": null }] }
 ```
 
+> **Catatan:** data ini diisi cron `matches:sync` (jalan tiap 15 menit), bukan
+> input manual. Kalau `FOOTBALL_DATA_API_KEY` di `.env` belum diisi API key
+> asli, endpoint ini akan selalu balikin `data: []` — bukan berarti endpointnya
+> rusak.
+
 ---
 
 ## 3. Endpoint Admin (wajib login, prefix `/api/admin`)
@@ -190,11 +195,28 @@ Catatan:
 | `422` | Validasi gagal | `{ "message": "...", "errors": { "field": ["pesan"] } }` |
 | `422` | Hapus kategori yang masih dipakai artikel | `{ "message": "Kategori masih dipakai artikel, tidak bisa dihapus." }` |
 | `404` | Artikel/kategori tidak ditemukan, atau artikel belum published | `{ "message": "Not Found" / "..." }` |
+| `419` | CSRF token tidak cocok/hilang | Biasanya karena lupa panggil `GET /api/csrf-cookie` dulu, atau cookie session sudah kedaluwarsa — ulangi dari §1.1 |
 | `429` | Login kena rate limit | — |
 
 ---
 
-## 5. Belum Tersedia (jangan diasumsikan ada)
+## 5. Non-API: Route Fallback SPA
+
+Semua path selain `/api/*` (termasuk `/`, `/login`, `/admin/apa-pun`) dilayani
+Laravel lewat satu route catch-all yang serve `public/index.html` — bukan
+routing Laravel per halaman. Jadi:
+
+- React Router yang menentukan halaman mana yang muncul, bukan Laravel.
+- Refresh browser di URL apa pun (`/berita/judul-artikel`, `/admin/articles`)
+  tetap harus balikin `index.html` yang sama, lalu React Router yang urus sisanya.
+- **Hasil `npm run build`** (folder `dist/` beserta `index.html`-nya) wajib
+  disalin ke `public/` folder Laravel ini supaya route ini bisa serve-nya.
+  Sebelum itu dilakukan, semua path non-`/api` akan nampilin pesan placeholder
+  "React SPA belum di-build..." — itu normal, bukan error backend.
+
+---
+
+## 6. Belum Tersedia (jangan diasumsikan ada)
 
 - CRUD Pemain & Social Link untuk admin (M2)
 - Endpoint kelola akun & role (M2, Master only)
