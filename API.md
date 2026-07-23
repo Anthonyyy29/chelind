@@ -202,17 +202,17 @@ Catatan:
 
 ## 5. Non-API: Route Fallback SPA
 
-Semua path selain `/api/*` (termasuk `/`, `/login`, `/admin/apa-pun`) dilayani
-Laravel lewat satu route catch-all yang serve `public/index.html` — bukan
-routing Laravel per halaman. Jadi:
+Backend dan frontend satu repo. Semua path selain `/api/*` (termasuk `/`,
+`/login`, `/admin/apa-pun`) dirender lewat `resources/views/app.blade.php` via
+satu route catch-all di `routes/web.php` — bukan routing Laravel per halaman.
 
-- React Router yang menentukan halaman mana yang muncul, bukan Laravel.
+- React Router (di `resources/js/app.tsx`) yang menentukan halaman mana yang
+  muncul, bukan Laravel.
 - Refresh browser di URL apa pun (`/berita/judul-artikel`, `/admin/articles`)
-  tetap harus balikin `index.html` yang sama, lalu React Router yang urus sisanya.
-- **Hasil `npm run build`** (folder `dist/` beserta `index.html`-nya) wajib
-  disalin ke `public/` folder Laravel ini supaya route ini bisa serve-nya.
-  Sebelum itu dilakukan, semua path non-`/api` akan nampilin pesan placeholder
-  "React SPA belum di-build..." — itu normal, bukan error backend.
+  tetap balikin shell HTML yang sama, lalu React Router yang urus sisanya.
+- `@vite([...])` di `app.blade.php` otomatis pakai dev server (`npm run dev`)
+  saat development, atau manifest hasil `npm run build` di production —
+  **tidak ada langkah manual copy file apa pun.**
 
 ---
 
