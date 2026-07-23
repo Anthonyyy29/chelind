@@ -1,40 +1,31 @@
-import { createInertiaApp } from '@inertiajs/react';
-import { Toaster } from '@/components/ui/sonner';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { initializeTheme } from '@/hooks/use-appearance';
-import AppLayout from '@/layouts/app-layout';
-import AuthLayout from '@/layouts/auth-layout';
-import SettingsLayout from '@/layouts/settings/layout';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import '../css/app.css';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+// Placeholder — Ali lanjutkan dari sini. Daftar halaman & endpoint yang
+// tersedia ada di KONTEKS-ALI.md dan API.md di root repo ini.
+function Home() {
+    return (
+        <main className="flex min-h-screen items-center justify-center">
+            <h1 className="text-2xl font-semibold">Chelind Football</h1>
+        </main>
+    );
+}
 
-createInertiaApp({
-    title: (title) => (title ? `${title} - ${appName}` : appName),
-    layout: (name) => {
-        switch (true) {
-            case name === 'welcome':
-                return null;
-            case name.startsWith('auth/'):
-                return AuthLayout;
-            case name.startsWith('settings/'):
-                return [AppLayout, SettingsLayout];
-            default:
-                return AppLayout;
-        }
-    },
-    strictMode: true,
-    withApp(app) {
-        return (
-            <TooltipProvider delayDuration={0}>
-                {app}
-                <Toaster />
-            </TooltipProvider>
-        );
-    },
-    progress: {
-        color: '#4B5563',
-    },
-});
+function App() {
+    return (
+        <Routes>
+            <Route path="/" element={<Home />} />
+        </Routes>
+    );
+}
 
-// This will set light / dark mode on load...
-initializeTheme();
+const container = document.getElementById('app');
+
+if (container) {
+    createRoot(container).render(
+        <BrowserRouter>
+            <App />
+        </BrowserRouter>,
+    );
+}
