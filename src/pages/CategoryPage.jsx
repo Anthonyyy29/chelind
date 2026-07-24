@@ -67,8 +67,8 @@ export default function CategoryPage({ initialCategory = 'MATCHDAY', onSelectArt
             onClick={() => onSelectArticle && onSelectArticle(articles[0]?.slug)}
           >
             <img
-              src={getCategoryHeroImage()}
-              alt={`Chelindo Featured ${initialCategory}`}
+              src={articles[0]?.image || getCategoryHeroImage()}
+              alt={articles[0]?.title || `Chelindo Featured ${initialCategory}`}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-6 sm:p-10">
