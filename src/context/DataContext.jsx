@@ -56,14 +56,23 @@ It looked bleak at the interval. Son Heung-min had given Spurs a deserved lead m
   }
 ];
 
+const CHELSEA_LOGO = 'https://upload.wikimedia.org/wikipedia/en/c/cc/Chelsea_FC.svg';
+const ARSENAL_LOGO = 'https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg';
+const MANCITY_LOGO = 'https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg';
+const REALMADRID_LOGO = 'https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg';
+const LIVERPOOL_LOGO = 'https://upload.wikimedia.org/wikipedia/en/0/0c/Liverpool_FC.svg';
+const TOTTENHAM_LOGO = 'https://upload.wikimedia.org/wikipedia/en/b/b4/Tottenham_Hotspur.svg';
+const PSG_LOGO = 'https://upload.wikimedia.org/wikipedia/en/a/a7/Paris_Saint-Germain_F.C..svg';
+const BRENTFORD_LOGO = 'https://upload.wikimedia.org/wikipedia/en/2/2a/Brentford_FC_crest.svg';
+
 const INITIAL_MATCHES = [
-  { id: 1, competition: 'PREMIER LEAGUE', date: '18 Jul 2026 • 21:00 WIB', homeTeam: 'Chelsea', homeScore: 3, awayTeam: 'Arsenal', awayScore: 1, status: 'Completed', result: 'MENANG', venue: 'Stamford Bridge' },
-  { id: 2, competition: 'PREMIER LEAGUE', date: '12 Jul 2026 • 19:30 WIB', homeTeam: 'Manchester City', homeScore: 1, awayTeam: 'Chelsea', awayScore: 2, status: 'Completed', result: 'MENANG', venue: 'Etihad Stadium' },
-  { id: 3, competition: 'UEFA CHAMPIONS LEAGUE', date: '23 Jul 2026 • 03:00 WIB', homeTeam: 'Chelsea', homeScore: '-', awayTeam: 'Real Madrid', awayScore: '-', status: 'Upcoming', result: '', venue: 'Stamford Bridge' },
-  { id: 4, competition: 'PREMIER LEAGUE', date: '27 Jul 2026 • 23:30 WIB', homeTeam: 'Chelsea', homeScore: '-', awayTeam: 'Liverpool', awayScore: '-', status: 'Upcoming', result: '', venue: 'Stamford Bridge' },
-  { id: 5, competition: 'PREMIER LEAGUE', date: '5 Jul 2026 • 22:00 WIB', homeTeam: 'Tottenham', homeScore: 0, awayTeam: 'Chelsea', awayScore: 0, status: 'Completed', result: 'IMBANG', venue: 'Tottenham Hotspur St.' },
-  { id: 6, competition: 'UEFA CHAMPIONS LEAGUE', date: '30 Jul 2026 • 02:00 WIB', homeTeam: 'Chelsea', homeScore: '-', awayTeam: 'PSG', awayScore: '-', status: 'Upcoming', result: '', venue: 'Stamford Bridge' },
-  { id: 7, competition: 'PREMIER LEAGUE', date: '1 Jul 2026 • 22:00 WIB', homeTeam: 'Chelsea', homeScore: 2, awayTeam: 'Brentford', awayScore: 0, status: 'Completed', result: 'MENANG', venue: 'Stamford Bridge' },
+  { id: 1, competition: 'PREMIER LEAGUE', date: '18 Jul 2026 • 21:00 WIB', homeTeam: 'Chelsea FC', homeScore: 3, awayTeam: 'Arsenal FC', awayScore: 1, status: 'Completed', result: 'MENANG', venue: 'Stamford Bridge', homeLogo: CHELSEA_LOGO, awayLogo: ARSENAL_LOGO },
+  { id: 2, competition: 'PREMIER LEAGUE', date: '12 Jul 2026 • 19:30 WIB', homeTeam: 'Manchester City', homeScore: 1, awayTeam: 'Chelsea FC', awayScore: 2, status: 'Completed', result: 'MENANG', venue: 'Etihad Stadium', homeLogo: MANCITY_LOGO, awayLogo: CHELSEA_LOGO },
+  { id: 3, competition: 'UEFA CHAMPIONS LEAGUE', date: '23 Jul 2026 • 03:00 WIB', homeTeam: 'Chelsea FC', homeScore: '-', awayTeam: 'Real Madrid', awayScore: '-', status: 'Upcoming', result: '', venue: 'Stamford Bridge', homeLogo: CHELSEA_LOGO, awayLogo: REALMADRID_LOGO },
+  { id: 4, competition: 'PREMIER LEAGUE', date: '27 Jul 2026 • 23:30 WIB', homeTeam: 'Chelsea FC', homeScore: '-', awayTeam: 'Liverpool FC', awayScore: '-', status: 'Upcoming', result: '', venue: 'Stamford Bridge', homeLogo: CHELSEA_LOGO, awayLogo: LIVERPOOL_LOGO },
+  { id: 5, competition: 'PREMIER LEAGUE', date: '5 Jul 2026 • 22:00 WIB', homeTeam: 'Tottenham Hotspur', homeScore: 0, awayTeam: 'Chelsea FC', awayScore: 0, status: 'Completed', result: 'IMBANG', venue: 'Tottenham Hotspur St.', homeLogo: TOTTENHAM_LOGO, awayLogo: CHELSEA_LOGO },
+  { id: 6, competition: 'UEFA CHAMPIONS LEAGUE', date: '30 Jul 2026 • 02:00 WIB', homeTeam: 'Chelsea FC', homeScore: '-', awayTeam: 'PSG', awayScore: '-', status: 'Upcoming', result: '', venue: 'Stamford Bridge', homeLogo: CHELSEA_LOGO, awayLogo: PSG_LOGO },
+  { id: 7, competition: 'PREMIER LEAGUE', date: '1 Jul 2026 • 22:00 WIB', homeTeam: 'Chelsea FC', homeScore: 2, awayTeam: 'Brentford FC', awayScore: 0, status: 'Completed', result: 'MENANG', venue: 'Stamford Bridge', homeLogo: CHELSEA_LOGO, awayLogo: BRENTFORD_LOGO },
 ];
 
 const INITIAL_PLAYERS = [

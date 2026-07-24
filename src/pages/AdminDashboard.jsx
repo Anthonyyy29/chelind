@@ -1118,8 +1118,30 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
                     required
                     value={matchForm.homeTeam}
                     onChange={(e) => setMatchForm({ ...matchForm, homeTeam: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none focus:border-blue-500"
+                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none focus:border-blue-500 mb-2"
                   />
+                  <label className="block text-[11px] text-slate-400 font-bold mb-1">Logo Tim Home (Upload / URL):</label>
+                  <div className="flex items-center gap-2">
+                    <label className="cursor-pointer px-3 py-1.5 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-lg text-[11px] font-bold flex items-center gap-1.5 text-blue-400">
+                      <Upload className="w-3 h-3" /> Upload Logo
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => setMatchForm((prev) => ({ ...prev, homeLogo: reader.result }));
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        className="hidden"
+                      />
+                    </label>
+                    {matchForm.homeLogo && (
+                      <img src={matchForm.homeLogo} alt="Home Logo" className="w-6 h-6 object-contain bg-white/10 p-0.5 rounded" />
+                    )}
+                  </div>
                 </div>
 
                 <div>
@@ -1141,8 +1163,30 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
                     required
                     value={matchForm.awayTeam}
                     onChange={(e) => setMatchForm({ ...matchForm, awayTeam: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none focus:border-blue-500"
+                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none focus:border-blue-500 mb-2"
                   />
+                  <label className="block text-[11px] text-slate-400 font-bold mb-1">Logo Tim Away (Upload / URL):</label>
+                  <div className="flex items-center gap-2">
+                    <label className="cursor-pointer px-3 py-1.5 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-lg text-[11px] font-bold flex items-center gap-1.5 text-blue-400">
+                      <Upload className="w-3 h-3" /> Upload Logo
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => setMatchForm((prev) => ({ ...prev, awayLogo: reader.result }));
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        className="hidden"
+                      />
+                    </label>
+                    {matchForm.awayLogo && (
+                      <img src={matchForm.awayLogo} alt="Away Logo" className="w-6 h-6 object-contain bg-white/10 p-0.5 rounded" />
+                    )}
+                  </div>
                 </div>
 
                 <div>
