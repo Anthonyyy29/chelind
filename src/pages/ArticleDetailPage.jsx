@@ -104,92 +104,108 @@ export default function ArticleDetailPage({ articleSlug, onNavigateBack, onSelec
         </div>
 
         {/* Match Stats Widget in Indonesian */}
-        <div className="bg-[#18181b] text-white rounded-xl p-6 sm:p-8 my-10 shadow-2xl border border-white/10">
-          <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
-            <span className="bg-blue-600 text-white px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider">
-              STATISTIK PERTANDINGAN
-            </span>
-            <span className="text-xs font-bold text-slate-300">
-              Chelsea 2-1 Tottenham Hotspur
-            </span>
-          </div>
+        {(() => {
+          const stats = article.stats || {
+            homeTeam: 'Chelsea FC',
+            awayTeam: 'Tottenham Hotspur',
+            homeScore: '2',
+            awayScore: '1',
+            possessionHome: 58,
+            possessionAway: 42,
+            shotsHome: 7,
+            shotsAway: 4,
+            passHome: 91,
+            passAway: 84,
+            cornersHome: 6,
+            cornersAway: 3,
+            goalscorersText: "Son Heung-min 34' (Spurs)\nCole Palmer 58', 79' (Chelsea)"
+          };
 
-          {/* Stats Bar List */}
-          <div className="space-y-4 text-xs font-semibold">
-            {/* Possession */}
-            <div>
-              <div className="flex justify-between mb-1 text-slate-300">
-                <span className="font-bold text-sm text-white">58%</span>
-                <span className="text-[10px] tracking-wider text-slate-400 uppercase">PENGUASAAN BOLA</span>
-                <span className="font-bold text-sm text-white">42%</span>
-              </div>
-              <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden flex">
-                <div className="bg-blue-600 h-full w-[58%]" />
-                <div className="bg-slate-500 h-full w-[42%]" />
-              </div>
-            </div>
+          const goalscorersList = stats.goalscorersText
+            ? stats.goalscorersText.split('\n').filter(Boolean)
+            : ["Son Heung-min 34' (Spurs)", "Cole Palmer 58', 79' (Chelsea)"];
 
-            {/* Shots on Target */}
-            <div>
-              <div className="flex justify-between mb-1 text-slate-300">
-                <span className="font-bold text-sm text-white">7</span>
-                <span className="text-[10px] tracking-wider text-slate-400 uppercase">TEMBAKAN TEPAT SASARAN</span>
-                <span className="font-bold text-sm text-white">4</span>
+          return (
+            <div className="bg-[#18181b] text-white rounded-xl p-6 sm:p-8 my-10 shadow-2xl border border-white/10">
+              <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+                <span className="bg-blue-600 text-white px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider">
+                  STATISTIK PERTANDINGAN
+                </span>
+                <span className="text-xs font-bold text-slate-300">
+                  {stats.homeTeam} {stats.homeScore}-{stats.awayScore} {stats.awayTeam}
+                </span>
               </div>
-              <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden flex">
-                <div className="bg-blue-600 h-full w-[63%]" />
-                <div className="bg-slate-500 h-full w-[37%]" />
-              </div>
-            </div>
 
-            {/* Pass Accuracy */}
-            <div>
-              <div className="flex justify-between mb-1 text-slate-300">
-                <span className="font-bold text-sm text-white">91%</span>
-                <span className="text-[10px] tracking-wider text-slate-400 uppercase">AKURASI UMPAN</span>
-                <span className="font-bold text-sm text-white">84%</span>
-              </div>
-              <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden flex">
-                <div className="bg-blue-600 h-full w-[91%]" />
-                <div className="bg-slate-500 h-full w-[84%]" />
-              </div>
-            </div>
+              {/* Stats Bar List */}
+              <div className="space-y-4 text-xs font-semibold">
+                {/* Possession */}
+                <div>
+                  <div className="flex justify-between mb-1 text-slate-300">
+                    <span className="font-bold text-sm text-white">{stats.possessionHome}%</span>
+                    <span className="text-[10px] tracking-wider text-slate-400 uppercase">PENGUASAAN BOLA</span>
+                    <span className="font-bold text-sm text-white">{stats.possessionAway}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden flex">
+                    <div className="bg-blue-600 h-full" style={{ width: `${stats.possessionHome}%` }} />
+                    <div className="bg-slate-500 h-full" style={{ width: `${stats.possessionAway}%` }} />
+                  </div>
+                </div>
 
-            {/* Corners */}
-            <div>
-              <div className="flex justify-between mb-1 text-slate-300">
-                <span className="font-bold text-sm text-white">6</span>
-                <span className="text-[10px] tracking-wider text-slate-400 uppercase">TENDANGAN SUDUT</span>
-                <span className="font-bold text-sm text-white">3</span>
-              </div>
-              <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden flex">
-                <div className="bg-blue-600 h-full w-[66%]" />
-                <div className="bg-slate-500 h-full w-[34%]" />
-              </div>
-            </div>
-          </div>
+                {/* Shots on Target */}
+                <div>
+                  <div className="flex justify-between mb-1 text-slate-300">
+                    <span className="font-bold text-sm text-white">{stats.shotsHome}</span>
+                    <span className="text-[10px] tracking-wider text-slate-400 uppercase">TEMBAKAN TEPAT SASARAN</span>
+                    <span className="font-bold text-sm text-white">{stats.shotsAway}</span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden flex">
+                    <div className="bg-blue-600 h-full" style={{ width: `${(stats.shotsHome / Math.max(1, stats.shotsHome + stats.shotsAway)) * 100}%` }} />
+                    <div className="bg-slate-500 h-full" style={{ width: `${(stats.shotsAway / Math.max(1, stats.shotsHome + stats.shotsAway)) * 100}%` }} />
+                  </div>
+                </div>
 
-          {/* Goalscorers List */}
-          <div className="mt-8 pt-6 border-t border-white/10 space-y-3">
-            <span className="text-[10px] font-bold tracking-wider text-blue-400 uppercase block mb-2">
-              PENCETAK GOL
-            </span>
-            <div className="flex items-center gap-3 text-xs">
-              <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[10px]">⚽</div>
-              <div>
-                <p className="font-bold text-white">Son Heung-min 34'</p>
-                <p className="text-[10px] text-slate-400">Tottenham Hotspur</p>
+                {/* Pass Accuracy */}
+                <div>
+                  <div className="flex justify-between mb-1 text-slate-300">
+                    <span className="font-bold text-sm text-white">{stats.passHome}%</span>
+                    <span className="text-[10px] tracking-wider text-slate-400 uppercase">AKURASI UMPAN</span>
+                    <span className="font-bold text-sm text-white">{stats.passAway}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden flex">
+                    <div className="bg-blue-600 h-full" style={{ width: `${stats.passHome}%` }} />
+                    <div className="bg-slate-500 h-full" style={{ width: `${stats.passAway}%` }} />
+                  </div>
+                </div>
+
+                {/* Corners */}
+                <div>
+                  <div className="flex justify-between mb-1 text-slate-300">
+                    <span className="font-bold text-sm text-white">{stats.cornersHome}</span>
+                    <span className="text-[10px] tracking-wider text-slate-400 uppercase">TENDANGAN SUDUT</span>
+                    <span className="font-bold text-sm text-white">{stats.cornersAway}</span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden flex">
+                    <div className="bg-blue-600 h-full" style={{ width: `${(stats.cornersHome / Math.max(1, stats.cornersHome + stats.cornersAway)) * 100}%` }} />
+                    <div className="bg-slate-500 h-full" style={{ width: `${(stats.cornersAway / Math.max(1, stats.cornersHome + stats.cornersAway)) * 100}%` }} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Goalscorers List */}
+              <div className="mt-8 pt-6 border-t border-white/10 space-y-3">
+                <span className="text-[10px] font-bold tracking-wider text-blue-400 uppercase block mb-2">
+                  PENCETAK GOL
+                </span>
+                {goalscorersList.map((scorer, idx) => (
+                  <div key={idx} className="flex items-center gap-3 text-xs">
+                    <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[10px]">⚽</div>
+                    <p className="font-bold text-white">{scorer}</p>
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="flex items-center gap-3 text-xs">
-              <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[10px]">⚽</div>
-              <div>
-                <p className="font-bold text-white">Cole Palmer 58', 79'</p>
-                <p className="text-[10px] text-slate-400">Chelsea</p>
-              </div>
-            </div>
-          </div>
-        </div>
+          );
+        })()}
 
         {/* Tags List */}
         <div className="flex flex-wrap gap-2 pt-4 pb-8 border-b border-slate-400/40">
