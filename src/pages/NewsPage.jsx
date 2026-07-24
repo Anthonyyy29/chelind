@@ -144,7 +144,7 @@ export default function NewsPage({ onSelectArticle }) {
                   />
                   {/* Top Left: Shirt Number */}
                   <span className="absolute top-2.5 left-2.5 bg-blue-600/90 text-white text-[11px] font-black px-2 py-0.5 rounded shadow">
-                    #{player.number}
+                    {player.number}
                   </span>
 
                   {/* Top Right: Country Flag (Uploaded Flag Image or Emoji) */}

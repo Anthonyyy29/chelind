@@ -768,7 +768,7 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
                       />
                       {/* Top Left: Shirt Number */}
                       <span className="absolute top-3 left-3 bg-blue-600 text-white text-xs font-black px-2.5 py-1 rounded-md shadow">
-                        #{player.number}
+                        {player.number}
                       </span>
 
                       {/* Top Right: Country Flag Badge (Uploaded Flag or Emoji) */}
