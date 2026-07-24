@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ImageCropModal from '../components/ImageCropModal';
 import { ArrowLeft, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Quote, Link, Image as ImageIcon, Trash2, CheckCircle, UploadCloud, X } from 'lucide-react';
 
 export default function EditArtikel({ article, onSave, onCancel, isDarkMode = true }) {
@@ -12,6 +13,10 @@ export default function EditArtikel({ article, onSave, onCancel, isDarkMode = tr
   const [tags, setTags] = useState(article?.tags || ['Chelsea', 'Premier League', 'Cole Palmer', 'Enzo Maresca', 'Stamford Bridge', 'UCL', 'Transfer']);
   const [newTag, setNewTag] = useState('');
 
+  // Crop Modal State
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [tempImageSrc, setTempImageSrc] = useState('');
+
   // Generated Slug
   const slug = title
     ? title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
@@ -21,15 +26,21 @@ export default function EditArtikel({ article, onSave, onCancel, isDarkMode = tr
   const wordCount = content.trim() ? content.trim().split(/\s+/).length : 259;
   const readTime = Math.max(1, Math.ceil(wordCount / 200));
 
-  const handleImageUpload = (e) => {
+  const handleImageFileSelect = (e) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImage(reader.result);
+        setTempImageSrc(reader.result);
+        setCropModalOpen(true);
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleCropComplete = (croppedUrl) => {
+    setImage(croppedUrl);
+    setCropModalOpen(false);
   };
 
   const handleAddTag = (e) => {
@@ -96,7 +107,7 @@ export default function EditArtikel({ article, onSave, onCancel, isDarkMode = tr
 
   return (
     <div className="space-y-6">
-      {/* Top Controls Bar (Matching Figma Image 3 & 4) */}
+      {/* Top Controls Bar */}
       <div className={`p-4 rounded-2xl ${themeClasses.card} border flex flex-wrap items-center justify-between gap-4`}>
         <div className="flex items-center gap-4">
           <button
@@ -149,7 +160,7 @@ export default function EditArtikel({ article, onSave, onCancel, isDarkMode = tr
 
           {/* Formatting Toolbar & Content Area */}
           <div className={`${themeClasses.card} rounded-2xl overflow-hidden border`}>
-            {/* Toolbar (Matching Screenshot 3/4 Toolbar: B I U Align Quote Link Image) */}
+            {/* Toolbar */}
             <div className={`flex flex-wrap items-center gap-1 p-3 border-b ${themeClasses.toolbar}`}>
               <button className="p-1.5 hover:bg-white/10 rounded font-bold">B</button>
               <button className="p-1.5 hover:bg-white/10 rounded italic">I</button>
@@ -174,7 +185,7 @@ export default function EditArtikel({ article, onSave, onCancel, isDarkMode = tr
             />
           </div>
 
-          {/* Featured Image Drag & Drop Upload Zone (Matching Screenshot 3/4/5 - 100% Clean Blank State) */}
+          {/* Featured Image Drag & Drop Upload Zone */}
           <div className={`${themeClasses.card} rounded-2xl p-6 border`}>
             <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">
               Gambar Utama (Featured Image)
@@ -184,7 +195,7 @@ export default function EditArtikel({ article, onSave, onCancel, isDarkMode = tr
               <input
                 type="file"
                 accept="image/png, image/jpeg, image/webp, image/jpg"
-                onChange={handleImageUpload}
+                onChange={handleImageFileSelect}
                 className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
               />
 
@@ -192,7 +203,7 @@ export default function EditArtikel({ article, onSave, onCancel, isDarkMode = tr
                 <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-slate-800">
                   <img src={image} alt="Featured Preview" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                    Klik untuk Ganti Gambar
+                    Klik untuk Ganti & Crop Gambar
                   </div>
                 </div>
               ) : (
@@ -200,7 +211,7 @@ export default function EditArtikel({ article, onSave, onCancel, isDarkMode = tr
                   <div className="w-12 h-12 rounded-2xl bg-blue-600/20 text-blue-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                     <ImageIcon className="w-6 h-6" />
                   </div>
-                  <p className="text-sm font-bold text-white mb-1">Klik untuk unggah gambar</p>
+                  <p className="text-sm font-bold text-white mb-1">Klik untuk unggah & crop gambar</p>
                   <p className="text-xs text-slate-400">PNG, JPG, WEBP — maks. 5 MB</p>
                 </div>
               )}
@@ -208,7 +219,7 @@ export default function EditArtikel({ article, onSave, onCancel, isDarkMode = tr
           </div>
         </div>
 
-        {/* Right Sidebar: Meta & Settings (Matching Screenshot 3 & 4) */}
+        {/* Right Sidebar: Meta & Settings */}
         <div className="space-y-6">
           {/* Status Artikel Card */}
           <div className={`${themeClasses.card} rounded-2xl p-6 border space-y-4`}>
@@ -306,40 +317,18 @@ export default function EditArtikel({ article, onSave, onCancel, isDarkMode = tr
               className="w-full px-3 py-2 rounded-xl text-xs bg-[#0b101d] border border-slate-800 text-white focus:outline-none focus:border-blue-500 mt-2"
             />
           </div>
-
-          {/* Statistik Artikel Card */}
-          <div className={`${themeClasses.card} rounded-2xl p-6 border space-y-2 text-xs`}>
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Statistik Artikel</h3>
-            <div className="flex justify-between py-1.5 border-b border-slate-800/60">
-              <span className="text-slate-400">Total Tayangan</span>
-              <span className="font-bold text-white">12.480</span>
-            </div>
-            <div className="flex justify-between py-1.5 border-b border-slate-800/60">
-              <span className="text-slate-400">Jumlah Kata</span>
-              <span className="font-bold text-white">{wordCount}</span>
-            </div>
-            <div className="flex justify-between py-1.5 border-b border-slate-800/60">
-              <span className="text-slate-400">Estimasi Baca</span>
-              <span className="font-bold text-white">{readTime} menit</span>
-            </div>
-            <div className="flex justify-between py-1.5">
-              <span className="text-slate-400">Terakhir Diubah</span>
-              <span className="font-bold text-white">18 Jul 2026</span>
-            </div>
-          </div>
-
-          {/* Zona Berbahaya Card */}
-          <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 text-center space-y-2">
-            <h3 className="text-xs font-bold text-red-400 uppercase tracking-wider">Zona Berbahaya</h3>
-            <button
-              onClick={onCancel}
-              className="w-full py-2.5 rounded-xl text-xs font-bold text-red-400 bg-red-500/10 border border-red-500/30 hover:bg-red-600 hover:text-white transition-colors"
-            >
-              Hapus Artikel Ini
-            </button>
-          </div>
         </div>
       </div>
+
+      {/* Interactive Image Crop Modal for Article Image */}
+      <ImageCropModal
+        isOpen={cropModalOpen}
+        imageSrc={tempImageSrc}
+        aspectRatio={1.77} // 16:9 ratio for article header
+        title="Crop & Sesuaikan Gambar Artikel (16:9)"
+        onCropComplete={handleCropComplete}
+        onCancel={() => setCropModalOpen(false)}
+      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 import EditArtikel from './EditArtikel';
+import ImageCropModal from '../components/ImageCropModal';
 import {
   LayoutDashboard,
   FileText,
@@ -123,6 +124,30 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
     image: '',
   });
 
+  // Interactive Image Crop Modal State
+  const [cropState, setCropState] = useState({
+    isOpen: false,
+    imageSrc: '',
+    aspectRatio: 1,
+    title: 'Crop & Sesuaikan Gambar',
+    onComplete: null,
+  });
+
+  const triggerCropModal = (file, aspectRatio, title, onCompleteCallback) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setCropState({
+        isOpen: true,
+        imageSrc: reader.result,
+        aspectRatio,
+        title,
+        onComplete: onCompleteCallback,
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
   // Editing Article Data
   const [editingArticleData, setEditingArticleData] = useState(null);
 
@@ -221,24 +246,20 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
   };
 
   const handleFlagImageUpload = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPlayerForm((prev) => ({ ...prev, flagUrl: reader.result }));
-      };
-      reader.readAsDataURL(file);
+      triggerCropModal(file, 1.5, 'Crop & Sesuaikan Gambar Bendera Negara', (cropped) => {
+        setPlayerForm((prev) => ({ ...prev, flagUrl: cropped }));
+      });
     }
   };
 
   const handlePlayerPhotoUpload = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPlayerForm((prev) => ({ ...prev, image: reader.result }));
-      };
-      reader.readAsDataURL(file);
+      triggerCropModal(file, 0.75, 'Crop & Sesuaikan Foto Pemain (3:4)', (cropped) => {
+        setPlayerForm((prev) => ({ ...prev, image: cropped }));
+      });
     }
   };
 
@@ -1128,11 +1149,11 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
                         type="file"
                         accept="image/*"
                         onChange={(e) => {
-                          const file = e.target.files[0];
+                          const file = e.target.files?.[0];
                           if (file) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => setMatchForm((prev) => ({ ...prev, homeLogo: reader.result }));
-                            reader.readAsDataURL(file);
+                            triggerCropModal(file, 1.0, 'Crop & Sesuaikan Logo Tim Home', (cropped) => {
+                              setMatchForm((prev) => ({ ...prev, homeLogo: cropped }));
+                            });
                           }
                         }}
                         className="hidden"
@@ -1173,11 +1194,11 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
                         type="file"
                         accept="image/*"
                         onChange={(e) => {
-                          const file = e.target.files[0];
+                          const file = e.target.files?.[0];
                           if (file) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => setMatchForm((prev) => ({ ...prev, awayLogo: reader.result }));
-                            reader.readAsDataURL(file);
+                            triggerCropModal(file, 1.0, 'Crop & Sesuaikan Logo Tim Away', (cropped) => {
+                              setMatchForm((prev) => ({ ...prev, awayLogo: cropped }));
+                            });
                           }
                         }}
                         className="hidden"
@@ -1336,6 +1357,19 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
           </div>
         </div>
       )}
+
+      {/* REUSABLE INTERACTIVE IMAGE CROP & ADJUSTMENT MODAL */}
+      <ImageCropModal
+        isOpen={cropState.isOpen}
+        imageSrc={cropState.imageSrc}
+        aspectRatio={cropState.aspectRatio}
+        title={cropState.title}
+        onCropComplete={(croppedUrl) => {
+          if (cropState.onComplete) cropState.onComplete(croppedUrl);
+          setCropState((prev) => ({ ...prev, isOpen: false }));
+        }}
+        onCancel={() => setCropState((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }
