@@ -223,11 +223,11 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
 
   return (
     <div className={`min-h-screen ${t.bg} font-poppins flex flex-col md:flex-row transition-colors duration-300 selection:bg-blue-600 selection:text-white`}>
-      {/* LEFT SIDEBAR (Matching Figma Screenshots 1-5) */}
-      <aside className={`w-full md:w-64 shrink-0 ${t.sidebar} border-r flex flex-col justify-between p-6 z-30`}>
+      {/* LEFT SIDEBAR (Matching Figma Screenshots 1-5 - Sticky Fixed Top Left) */}
+      <aside className={`w-full md:w-64 shrink-0 ${t.sidebar} border-r flex flex-col justify-between p-6 z-30 md:sticky md:top-0 md:h-screen overflow-y-auto`}>
         <div>
-          {/* Brand Logo */}
-          <div className="flex items-center justify-between mb-10">
+          {/* Brand Logo - Sticky Pinned Top Left */}
+          <div className="sticky top-0 z-20 flex items-center justify-between mb-8 pb-3 pt-1 backdrop-blur-md">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-black text-white text-lg shadow-lg shadow-blue-600/30">
                 c
