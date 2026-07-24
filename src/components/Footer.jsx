@@ -2,55 +2,42 @@ import React from 'react';
 
 export default function Footer() {
   return (
-    <footer className="bg-[#00144d] text-white pt-16 pb-8 border-t border-white/10">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-5 gap-10 pb-12">
-        {/* Brand Column */}
-        <div className="md:col-span-2 space-y-4">
-          <h2 className="text-2xl font-black tracking-wider text-white">CHELIND</h2>
-          <p className="text-xs text-slate-300 max-w-sm leading-relaxed">
-            Fanspage Chelsea terbesar dan terlengkap nomor 1 di Indonesia.
+    <footer className="bg-[#000e38] text-white py-12 font-poppins selection:bg-blue-600 selection:text-white">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Top Header Row */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-8">
+          {/* Left: Brand & Subtitle */}
+          <div className="space-y-2">
+            <a href="#home" className="inline-block">
+              <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-0.5">
+                chel<span className="inline-block w-2.5 h-2.5 rounded-full bg-blue-500 mx-0.5"></span>indo
+              </span>
+            </a>
+            <p className="text-xs sm:text-sm text-slate-300 font-normal">
+              Indonesia's largest Chelsea supporters community.
+            </p>
+          </div>
+
+          {/* Right: Nav Links */}
+          <div className="flex items-center gap-8 text-xs sm:text-sm font-semibold text-slate-300">
+            <a href="#news-page" className="hover:text-white transition-colors">
+              Our Story
+            </a>
+            <a href="#social" className="hover:text-white transition-colors">
+              Contact
+            </a>
+          </div>
+        </div>
+
+        {/* Horizontal Divider Line */}
+        <div className="w-full border-b border-white/20 mb-6" />
+
+        {/* Bottom Copyright Row */}
+        <div>
+          <p className="text-xs text-slate-300 font-normal">
+            © {new Date().getFullYear()} Chelindo. Independent fan site — not affiliated with Chelsea Football Club.
           </p>
         </div>
-
-        {/* Navigation Column */}
-        <div>
-          <h4 className="text-xs font-bold uppercase tracking-wider text-white mb-4">Navigasi</h4>
-          <ul className="space-y-2.5 text-xs text-slate-300">
-            <li><a href="#hero" className="hover:text-blue-400 transition-colors">Beranda</a></li>
-            <li><a href="#news" className="hover:text-blue-400 transition-colors">Berita</a></li>
-            <li><a href="#matches" className="hover:text-blue-400 transition-colors">Jadwal</a></li>
-            <li><a href="#matches" className="hover:text-blue-400 transition-colors">Klasemen</a></li>
-          </ul>
-        </div>
-
-        {/* Community Column */}
-        <div>
-          <h4 className="text-xs font-bold uppercase tracking-wider text-white mb-4">Komunitas</h4>
-          <ul className="space-y-2.5 text-xs text-slate-300">
-            <li><a href="#social" className="hover:text-blue-400 transition-colors">Regional</a></li>
-            <li><a href="#social" className="hover:text-blue-400 transition-colors">Nobar</a></li>
-            <li><a href="#social" className="hover:text-blue-400 transition-colors">Merchandise</a></li>
-            <li><a href="#social" className="hover:text-blue-400 transition-colors">Donasi</a></li>
-          </ul>
-        </div>
-
-        {/* About Column */}
-        <div>
-          <h4 className="text-xs font-bold uppercase tracking-wider text-white mb-4">Tentang</h4>
-          <ul className="space-y-2.5 text-xs text-slate-300">
-            <li><a href="#hero" className="hover:text-blue-400 transition-colors">Profil</a></li>
-            <li><a href="#social" className="hover:text-blue-400 transition-colors">Kontak</a></li>
-            <li><a href="#hero" className="hover:text-blue-400 transition-colors">Kebijakan Privasi</a></li>
-            <li><a href="#hero" className="hover:text-blue-400 transition-colors">Karier</a></li>
-          </ul>
-        </div>
-      </div>
-
-      {/* Bottom Copyright */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 border-t border-white/10 text-center">
-        <p className="text-[11px] text-slate-400">
-          © {new Date().getFullYear()} Chelind. Fanspage independen, tidak berafiliasi resmi dengan Chelsea FC.
-        </p>
       </div>
     </footer>
   );
