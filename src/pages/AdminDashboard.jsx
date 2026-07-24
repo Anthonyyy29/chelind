@@ -937,7 +937,7 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
                   required
                   value={playerForm.name}
                   onChange={(e) => setPlayerForm({ ...playerForm, name: e.target.value })}
-                  placeholder="Misal: Cole Palmer / Kylian Mbappe"
+                  placeholder="Misal: Cole Palmer / Reece James / Enzo Fernandez"
                   className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none focus:border-blue-500"
                 />
               </div>
