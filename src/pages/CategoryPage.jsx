@@ -63,13 +63,14 @@ export default function CategoryPage({ initialCategory = 'MATCHDAY', onSelectArt
         {/* Big Featured Image Banner (Mapped per category HD uploaded file) */}
         <div className="w-full rounded-none overflow-hidden mb-12 shadow-xl border border-slate-200">
           <div
-            className="aspect-[21/9] sm:aspect-[24/9] w-full overflow-hidden relative group cursor-pointer"
+            className="aspect-[16/9] sm:aspect-[21/10] w-full overflow-hidden relative group cursor-pointer"
             onClick={() => onSelectArticle && onSelectArticle(articles[0]?.slug)}
           >
             <img
               src={articles[0]?.image || getCategoryHeroImage()}
               alt={articles[0]?.title || `Chelindo Featured ${initialCategory}`}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+              style={{ objectPosition: 'center 15%' }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-6 sm:p-10">
               <div className="text-white max-w-3xl">
