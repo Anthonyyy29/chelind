@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, ZoomIn, ZoomOut, RotateCw, Check, Move } from 'lucide-react';
+import { X, ZoomIn, ZoomOut, RotateCw, Check, Move, Maximize2 } from 'lucide-react';
 
 export default function ImageCropModal({
   isOpen,
@@ -12,36 +12,80 @@ export default function ImageCropModal({
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
+  const [isDraggingImage, setIsDraggingImage] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  // Dynamic Crop Box Size State (Draggable Box Handles)
+  const [boxSize, setBoxSize] = useState({ width: 240, height: 240 / aspectRatio });
+  const [isResizingBox, setIsResizingBox] = useState(false);
+  const [resizeHandle, setResizeHandle] = useState(null);
+  const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 240, height: 240 / aspectRatio });
 
   const containerRef = useRef(null);
   const imageRef = useRef(null);
 
   useEffect(() => {
-    // Reset state on new image
+    // Reset state on new image or new aspect ratio
     setZoom(1);
     setRotation(0);
     setOffset({ x: 0, y: 0 });
-  }, [imageSrc]);
+    const defaultW = 240;
+    setBoxSize({ width: defaultW, height: defaultW / aspectRatio });
+  }, [imageSrc, aspectRatio]);
 
   if (!isOpen || !imageSrc) return null;
 
-  const handleMouseDown = (e) => {
-    setIsDragging(true);
+  // Dragging Image Handler
+  const handleImageMouseDown = (e) => {
+    if (isResizingBox) return;
+    setIsDraggingImage(true);
     setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
   };
 
   const handleMouseMove = (e) => {
-    if (!isDragging) return;
-    setOffset({
-      x: e.clientX - dragStart.x,
-      y: e.clientY - dragStart.y,
-    });
+    // Handling Box Resizing from Handles
+    if (isResizingBox && resizeHandle) {
+      const deltaX = e.clientX - resizeStart.x;
+      const deltaY = e.clientY - resizeStart.y;
+
+      let newWidth = resizeStart.width;
+      let newHeight = resizeStart.height;
+
+      if (resizeHandle.includes('e')) newWidth = Math.max(100, Math.min(320, resizeStart.width + deltaX * 2));
+      if (resizeHandle.includes('w')) newWidth = Math.max(100, Math.min(320, resizeStart.width - deltaX * 2));
+      if (resizeHandle.includes('s')) newHeight = Math.max(100, Math.min(320, resizeStart.height + deltaY * 2));
+      if (resizeHandle.includes('n')) newHeight = Math.max(100, Math.min(320, resizeStart.height - deltaY * 2));
+
+      setBoxSize({ width: newWidth, height: newHeight });
+      return;
+    }
+
+    // Handling Image Pan/Drag
+    if (isDraggingImage) {
+      setOffset({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y,
+      });
+    }
   };
 
   const handleMouseUp = () => {
-    setIsDragging(false);
+    setIsDraggingImage(false);
+    setIsResizingBox(false);
+    setResizeHandle(null);
+  };
+
+  // Handle Box Resize Start
+  const handleResizeStart = (e, handle) => {
+    e.stopPropagation();
+    setIsResizingBox(true);
+    setResizeHandle(handle);
+    setResizeStart({
+      x: e.clientX,
+      y: e.clientY,
+      width: boxSize.width,
+      height: boxSize.height,
+    });
   };
 
   const handleSaveCrop = () => {
@@ -51,9 +95,9 @@ export default function ImageCropModal({
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
 
-    // Output dimension based on aspect ratio
-    const outputWidth = 600;
-    const outputHeight = 600 / aspectRatio;
+    // Output dimension based on current box size
+    const outputWidth = Math.round(boxSize.width * 2.5);
+    const outputHeight = Math.round(boxSize.height * 2.5);
     canvas.width = outputWidth;
     canvas.height = outputHeight;
 
@@ -65,8 +109,8 @@ export default function ImageCropModal({
     ctx.rotate((rotation * Math.PI) / 180);
     ctx.scale(zoom, zoom);
 
-    // Translate by drag offset (normalized to output scale)
-    const scaleFactor = outputWidth / (containerRef.current ? containerRef.current.clientWidth : 300);
+    // Translate by drag offset
+    const scaleFactor = outputWidth / boxSize.width;
     ctx.translate(offset.x * scaleFactor, offset.y * scaleFactor);
 
     // Draw image centered
@@ -76,17 +120,17 @@ export default function ImageCropModal({
 
     ctx.restore();
 
-    const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+    const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.94);
     onCropComplete(croppedDataUrl);
   };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 font-poppins selection:bg-blue-600 selection:text-white">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 relative text-white shadow-2xl flex flex-col max-h-[90vh]">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 relative text-white shadow-2xl flex flex-col max-h-[92vh]">
         {/* Modal Header */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
           <div className="flex items-center gap-2">
-            <Move className="w-4 h-4 text-blue-400" />
+            <Maximize2 className="w-4 h-4 text-blue-400" />
             <h3 className="text-base font-bold">{title}</h3>
           </div>
           <button onClick={onCancel} className="text-slate-400 hover:text-white transition-colors">
@@ -94,21 +138,24 @@ export default function ImageCropModal({
           </button>
         </div>
 
-        {/* Crop Preview Area */}
-        <div className="flex-1 flex flex-col items-center justify-center min-h-[260px] bg-slate-950 rounded-xl overflow-hidden relative border border-slate-800 p-4 select-none">
+        {/* Crop Preview Area with Draggable Boundary Handles */}
+        <div
+          className="flex-1 flex flex-col items-center justify-center min-h-[300px] bg-slate-950 rounded-xl overflow-hidden relative border border-slate-800 p-4 select-none"
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+        >
+          {/* Main Draggable Box */}
           <div
             ref={containerRef}
-            className="relative overflow-hidden cursor-grab active:cursor-grabbing border-2 border-dashed border-blue-500/60 rounded-lg shadow-inner flex items-center justify-center"
+            className="relative overflow-hidden cursor-grab active:cursor-grabbing border-2 border-blue-500/90 rounded-lg shadow-[0_0_20px_rgba(37,99,235,0.4)] flex items-center justify-center group"
             style={{
-              width: '280px',
-              height: `${280 / aspectRatio}px`,
-              maxHeight: '280px',
+              width: `${boxSize.width}px`,
+              height: `${boxSize.height}px`,
             }}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
+            onMouseDown={handleImageMouseDown}
           >
+            {/* Image Layer */}
             <img
               ref={imageRef}
               src={imageSrc}
@@ -120,20 +167,82 @@ export default function ImageCropModal({
                 transformOrigin: 'center center',
               }}
             />
+
+            {/* Rule of Thirds Grid Lines */}
+            <div className="absolute inset-0 border border-blue-400/20 pointer-events-none grid grid-cols-3 grid-rows-3">
+              <div className="border-r border-b border-blue-400/20"></div>
+              <div className="border-r border-b border-blue-400/20"></div>
+              <div className="border-b border-blue-400/20"></div>
+              <div className="border-r border-b border-blue-400/20"></div>
+              <div className="border-r border-b border-blue-400/20"></div>
+              <div className="border-b border-blue-400/20"></div>
+            </div>
+
+            {/* 8 DRAGGABLE RESIZE HANDLES (Tarik/Turunkan Garis Crop Box) */}
+            {/* Top-Left Corner */}
+            <div
+              onMouseDown={(e) => handleResizeStart(e, 'nw')}
+              className="w-4 h-4 rounded bg-blue-500 border-2 border-white shadow-md absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 cursor-nwse-resize z-30 hover:scale-125 transition-transform"
+              title="Tarik untuk ubah ukuran"
+            />
+            {/* Top-Right Corner */}
+            <div
+              onMouseDown={(e) => handleResizeStart(e, 'ne')}
+              className="w-4 h-4 rounded bg-blue-500 border-2 border-white shadow-md absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 cursor-nesw-resize z-30 hover:scale-125 transition-transform"
+              title="Tarik untuk ubah ukuran"
+            />
+            {/* Bottom-Left Corner */}
+            <div
+              onMouseDown={(e) => handleResizeStart(e, 'sw')}
+              className="w-4 h-4 rounded bg-blue-500 border-2 border-white shadow-md absolute bottom-0 left-0 -translate-x-1/2 translate-y-1/2 cursor-nesw-resize z-30 hover:scale-125 transition-transform"
+              title="Tarik untuk ubah ukuran"
+            />
+            {/* Bottom-Right Corner */}
+            <div
+              onMouseDown={(e) => handleResizeStart(e, 'se')}
+              className="w-4 h-4 rounded bg-blue-500 border-2 border-white shadow-md absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 cursor-nwse-resize z-30 hover:scale-125 transition-transform"
+              title="Tarik untuk ubah ukuran"
+            />
+
+            {/* Top-Center Edge Handle */}
+            <div
+              onMouseDown={(e) => handleResizeStart(e, 'n')}
+              className="w-6 h-2 rounded bg-blue-500 border border-white shadow-md absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-ns-resize z-30 hover:scale-125 transition-transform"
+              title="Tarik atas/bawah"
+            />
+            {/* Bottom-Center Edge Handle */}
+            <div
+              onMouseDown={(e) => handleResizeStart(e, 's')}
+              className="w-6 h-2 rounded bg-blue-500 border border-white shadow-md absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 cursor-ns-resize z-30 hover:scale-125 transition-transform"
+              title="Tarik atas/bawah"
+            />
+            {/* Left-Center Edge Handle */}
+            <div
+              onMouseDown={(e) => handleResizeStart(e, 'w')}
+              className="w-2 h-6 rounded bg-blue-500 border border-white shadow-md absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize z-30 hover:scale-125 transition-transform"
+              title="Tarik kiri/kanan"
+            />
+            {/* Right-Center Edge Handle */}
+            <div
+              onMouseDown={(e) => handleResizeStart(e, 'e')}
+              className="w-2 h-6 rounded bg-blue-500 border border-white shadow-md absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 cursor-ew-resize z-30 hover:scale-125 transition-transform"
+              title="Tarik kiri/kanan"
+            />
           </div>
-          <p className="text-[11px] text-slate-400 mt-3 flex items-center gap-1">
-            <Move className="w-3 h-3 text-blue-400" /> Geser gambar untuk menyesuaikan posisi
+
+          <p className="text-[11px] text-slate-400 mt-3 flex items-center gap-1.5">
+            <Move className="w-3.5 h-3.5 text-blue-400" /> Geser gambar atau tarik titik biru di pinggir garis untuk menaikkan/menurunkan bingkai crop
           </p>
         </div>
 
         {/* Adjustment Controls */}
-        <div className="py-4 space-y-4 border-t border-slate-800 mt-4">
+        <div className="py-3 space-y-3 border-t border-slate-800 mt-3">
           {/* Zoom Slider */}
           <div className="flex items-center gap-3">
             <ZoomOut className="w-4 h-4 text-slate-400 shrink-0" />
             <input
               type="range"
-              min="0.5"
+              min="0.4"
               max="3"
               step="0.05"
               value={zoom}
@@ -162,10 +271,11 @@ export default function ImageCropModal({
                 setZoom(1);
                 setRotation(0);
                 setOffset({ x: 0, y: 0 });
+                setBoxSize({ width: 240, height: 240 / aspectRatio });
               }}
               className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
             >
-              Reset Posisi
+              Reset Posisi & Ukuran
             </button>
           </div>
         </div>
