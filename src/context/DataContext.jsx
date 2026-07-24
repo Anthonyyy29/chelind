@@ -8,19 +8,19 @@ const INITIAL_ARTICLES = [
     slug: 'palmer-double-sinks-spurs',
     category: 'MATCH REPORT',
     title: 'Dua gol Palmer menenggelamkan Spurs dalam Derby London.',
-    subtitle: 'The Blues turn a one-goal deficit into a statement win after the break, with Cole Palmer stealing the show at Stamford Bridge.',
+    subtitle: 'The Blues membalikkan keadaan dari tertinggal satu gol menjadi kemenangan spektakuler di babak kedua, dengan Cole Palmer menjadi bintang utama di Stamford Bridge.',
     author: 'Admin Chelind',
     date: '18 Jul 2026',
-    readTime: '5 MIN READ',
-    image: 'assets/news/featured.jpg', // Cole Palmer Holding FIFA Trophy / Celebrating
+    readTime: '5 MENIT BACA',
+    image: 'assets/news/featured.jpg', // Cole Palmer Holding Trophy / Celebrating
     isFeatured: true,
     status: 'published',
-    content: `Stamford Bridge erupted on a tense Wednesday night as Cole Palmer delivered a masterclass to overturn Tottenham Hotspur and hand Chelsea three crucial Premier League points. Two second-half goals from the England international completed a remarkable comeback.
+    content: `Stamford Bridge bergemuruh pada Rabu malam yang menegangkan saat Cole Palmer tampil luar biasa untuk membalikkan keadaan atas Tottenham Hotspur dan memberikan tiga poin penting bagi Chelsea di Premier League. Dua gol di babak kedua dari pemain internasional Inggris tersebut melengkapi kebangkitan yang luar biasa.
 
-It looked bleak at the interval. Son Heung-min had given Spurs a deserved lead midway through the first half, and Chelsea struggled to find their rhythm against a well-organised backline. But Enzo Fernandez pulled the strings after the restart, and it was his incisive passing that unlocked the Spurs defence time and again.`,
+Situasi sempat terlihat sulit pada babak pertama. Son Heung-min membawa Spurs unggul terlebih dahulu di pertengahan babak pertama, dan Chelsea berjuang keras menemukan ritme permainan menghadapi lini pertahanan lawan yang terorganisir dengan baik. Namun Enzo Fernandez berhasil mengendalikan permainan setelah jeda, dan umpan-umpan terukurnya berulang kali membongkar pertahanan Spurs.`,
     quote: {
-      text: "He is a match-winner. Pure and simple. When it matters most, Cole delivers.",
-      author: "ENZO MARESCA — CHELSEA HEAD COACH"
+      text: "Dia adalah pemenang pertandingan sejati. Ketika tim sangat membutuhkan, Cole selalu datang memberikan hasil luar biasa.",
+      author: "ENZO MARESCA — PELATIH UTAMA CHELSEA"
     },
     tags: ['MATCH REPORT', 'COLE PALMER', 'LONDON DERBY', 'PREMIER LEAGUE', 'TOTTENHAM']
   },
@@ -28,31 +28,31 @@ It looked bleak at the interval. Son Heung-min had given Spurs a deserved lead m
     id: 2,
     slug: 'transfer-update-chelsea-bidik-bintang-muda-la-liga',
     category: 'TRANSFER NEWS',
-    title: 'Chelsea Open Talks Over Serie A Defender',
-    subtitle: 'Reports suggest an opening bid has already been submitted for the promising centre-back.',
-    author: 'Redaksi',
+    title: 'Chelsea Buka Pembicaraan Negosiasi Bek Muda Berbakat Serie A',
+    subtitle: 'Laporan resmi mengonfirmasi tawaran awal telah diajukan untuk memperkuat lini pertahanan The Blues musim depan.',
+    author: 'Redaksi Chelind',
     date: '17 Jul 2026',
-    readTime: '4 MIN READ',
+    readTime: '4 MENIT BACA',
     image: 'assets/news/enzo fernandes.jpg', // Enzo Fernandez
     isFeatured: false,
     status: 'published',
-    content: 'Chelsea have formally initiated discussions with Serie A and La Liga clubs as Enzo Maresca seeks to fortify his defensive unit.',
-    tags: ['TRANSFER NEWS', 'LA LIGA', 'CHELSEA']
+    content: 'Chelsea telah secara resmi memulai diskusi dengan klub papan atas Italia dan Spanyol saat Enzo Maresca berusaha memperkuat unit pertahanannya menjelang musim baru.',
+    tags: ['TRANSFER NEWS', 'SERIE A', 'CHELSEA', 'ENZO MARESCA']
   },
   {
     id: 3,
     slug: 'jadwal-pramusim-chelsea-2026-lawan-dan-venue',
     category: 'MATCHDAY',
-    title: 'Everything You Need Before Kick-Off at Anfield',
-    subtitle: 'Team news, predicted line-ups, and where to watch from Indonesia.',
+    title: 'Segala Hal Yang Perlu Anda Ketahui Sebelum Kick-Off di Anfield',
+    subtitle: 'Kabar terkini skuad, prediksi susunan pemain, dan panduan nonton bareng fans di Indonesia.',
     author: 'Admin Chelind',
     date: '16 Jul 2026',
-    readTime: '3 MIN READ',
+    readTime: '3 MENIT BACA',
     image: 'assets/news/matchday.jpg', // Matchday
     isFeatured: false,
     status: 'published',
-    content: 'All eyes turn to Anfield this weekend as Chelsea travel to face Liverpool in a high-stakes Premier League clash.',
-    tags: ['PREVIEW', 'LIVERPOOL', 'PREMIER LEAGUE']
+    content: 'Seluruh perhatian tertuju ke Anfield akhir pekan ini saat Chelsea bertandang menghadapi Liverpool dalam laga sengit perburuan puncak klasemen Premier League.',
+    tags: ['PREVIEW', 'LIVERPOOL', 'PREMIER LEAGUE', 'MATCHDAY']
   }
 ];
 
@@ -85,8 +85,7 @@ const INITIAL_PLAYERS = [
 
 export function DataProvider({ children }) {
   const [articles, setArticles] = useState(() => {
-    const saved = localStorage.getItem('chelind_articles');
-    return saved ? JSON.parse(saved) : INITIAL_ARTICLES;
+    return INITIAL_ARTICLES;
   });
 
   const [matches, setMatches] = useState(() => {
@@ -117,8 +116,8 @@ export function DataProvider({ children }) {
       ...newArticle,
       id: Date.now(),
       slug: newArticle.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      date: newArticle.date || new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-      readTime: '4 MIN READ',
+      date: newArticle.date || new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+      readTime: '4 MENIT BACA',
       author: newArticle.author || 'Admin Chelind',
       status: newArticle.status || 'published',
     };
