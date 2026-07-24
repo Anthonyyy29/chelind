@@ -65,40 +65,53 @@ export default function NewsPage({ onSelectArticle }) {
 
       {/* MAIN CONTENT ON NEUTRAL GRAY BACKGROUND */}
       <main className="max-w-4xl mx-auto py-12 px-4 sm:px-6 space-y-12">
-        {/* 2. FEATURED ARTICLE CARD (Cole Palmer Holding Trophy - assets/news/featured.jpg) */}
-        <section
-          onClick={() => onSelectArticle && onSelectArticle(featuredArticle.slug || 'palmer-double-sinks-spurs')}
-          className="w-full rounded-2xl overflow-hidden shadow-2xl border border-slate-300/60 relative group cursor-pointer"
-        >
-          <div className="aspect-[16/9] sm:aspect-[21/10] w-full overflow-hidden relative">
-            <img
-              src="assets/news/featured.jpg"
-              alt={featuredArticle.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-              style={{ objectPosition: 'center 20%' }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent flex items-end p-6 sm:p-10">
-              <div className="text-white max-w-2xl">
-                <span className="bg-blue-600 text-white px-3 py-1 rounded text-[10px] font-extrabold uppercase tracking-wider mb-3 inline-block shadow">
-                  FEATURED
-                </span>
-                <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight mb-3 group-hover:text-blue-300 transition-colors">
-                  Palmer's Late Strike Sends Chelsea Top of the Table
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-200 line-clamp-2 leading-relaxed mb-4 font-normal">
-                  A tense night at the Bridge ends in delirium as the Blues snatch three points deep into stoppage time.
-                </p>
-                <div className="flex items-center gap-3 text-xs font-semibold text-slate-300 border-t border-white/10 pt-3">
-                  <span className="text-blue-400 font-bold">MATCH REPORT</span>
-                  <span>•</span>
-                  <span>9 JUL 2026</span>
-                  <span>•</span>
-                  <span>4 MIN READ</span>
+        {/* 2. FEATURED ARTICLE CARD (Cole Palmer Holding Trophy) */}
+        {(() => {
+          const feat = articles[0] || {
+            title: "Dua gol Palmer menenggelamkan Spurs dalam Derby London.",
+            subtitle: "The Blues turn a one-goal deficit into a statement win after the break, with Cole Palmer stealing the show at Stamford Bridge.",
+            category: "MATCH REPORT",
+            date: "18 Jul 2026",
+            readTime: "5 MIN READ",
+            image: "assets/news/featured.jpg",
+            slug: "palmer-double-sinks-spurs"
+          };
+          return (
+            <section
+              onClick={() => onSelectArticle && onSelectArticle(feat.slug)}
+              className="w-full rounded-2xl overflow-hidden shadow-2xl border border-slate-300/60 relative group cursor-pointer"
+            >
+              <div className="aspect-[16/9] sm:aspect-[21/10] w-full overflow-hidden relative">
+                <img
+                  src={feat.image || "assets/news/featured.jpg"}
+                  alt={feat.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  style={{ objectPosition: 'center 20%' }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent flex items-end p-6 sm:p-10">
+                  <div className="text-white max-w-2xl">
+                    <span className="bg-blue-600 text-white px-3 py-1 rounded text-[10px] font-extrabold uppercase tracking-wider mb-3 inline-block shadow">
+                      FEATURED STORY
+                    </span>
+                    <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight mb-3 group-hover:text-blue-300 transition-colors">
+                      {feat.title}
+                    </h2>
+                    <p className="text-xs sm:text-sm text-slate-200 line-clamp-2 leading-relaxed mb-4 font-normal">
+                      {feat.subtitle}
+                    </p>
+                    <div className="flex items-center gap-3 text-xs font-semibold text-slate-300 border-t border-white/10 pt-3">
+                      <span className="text-blue-400 font-bold">{feat.category || 'MATCH REPORT'}</span>
+                      <span>•</span>
+                      <span>{feat.date || '18 JUL 2026'}</span>
+                      <span>•</span>
+                      <span>{feat.readTime || '4 MIN READ'}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
+            </section>
+          );
+        })()}
 
         {/* Subtle Separator Divider Line */}
         <div className="w-full border-b border-slate-400/80 my-8" />
