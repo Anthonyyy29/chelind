@@ -20,10 +20,14 @@ import {
   LogOut,
   ExternalLink,
   Lock,
-  UserCheck
+  UserCheck,
+  Users,
+  Flag,
+  Upload,
+  Image as ImageIcon
 } from 'lucide-react';
 
-// Default Community Links matching Figma Image 2 (Tautan Komunitas / Manajemen Link)
+// Default Community Links matching Figma Image 2
 const DEFAULT_COMMUNITY_LINKS = [
   { id: 1, platform: 'WhatsApp', name: 'Grup WhatsApp Chelind Utama', desc: 'Grup diskusi utama komunitas Chelind', url: 'https://chat.whatsapp.com/LqpgBD74aQVDd3tICsvCoG', members: '1,024', status: 'Aktif', color: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' },
   { id: 2, platform: 'Telegram', name: 'Channel Telegram Chelind News', desc: 'Update berita dan transfer Chelsea', url: 'https://t.me/chelind_news', members: '8,320', status: 'Aktif', color: 'bg-sky-500/15 text-sky-400 border-sky-500/30' },
@@ -33,7 +37,7 @@ const DEFAULT_COMMUNITY_LINKS = [
   { id: 6, platform: 'YouTube', name: 'YouTube Chelind TV', desc: 'Video analisis mendalam & highlights', url: 'https://youtube.com/@chelind', members: '9,870', status: 'Nonaktif', color: 'bg-red-500/15 text-red-400 border-red-500/30' },
 ];
 
-// Default Admin Accounts matching Figma Image 1 & 3 (Role Setting)
+// Default Admin Accounts
 const DEFAULT_ADMIN_ROLES = [
   { id: 1, name: 'Admin Chelind', email: 'admin@chelind.id', role: 'Admin', status: 'Aktif', lastActive: 'Hari ini', avatar: 'AC' },
   { id: 2, name: 'Redaksi Utama', email: 'redaksi@chelind.id', role: 'Editor', status: 'Aktif', lastActive: 'Kemarin', avatar: 'RU' },
@@ -42,19 +46,46 @@ const DEFAULT_ADMIN_ROLES = [
   { id: 5, name: 'Rizky Pratama', email: 'rizky@chelind.id', role: 'Admin', status: 'Aktif', lastActive: '2 hari lalu', avatar: 'RP' },
 ];
 
+const PRESET_FLAGS = [
+  { code: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', label: 'Inggris' },
+  { code: '🇩🇰', label: 'Denmark' },
+  { code: '🇧🇷', label: 'Brasil' },
+  { code: '🇦🇷', label: 'Argentina' },
+  { code: '🇫🇷', label: 'Prancis' },
+  { code: '🇪🇸', label: 'Spanyol' },
+  { code: '🇮🇩', label: 'Indonesia' },
+  { code: '🇵🇹', label: 'Portugal' },
+  { code: '🇳🇬', label: 'Nigeria' },
+  { code: '🇸🇳', label: 'Senegal' },
+];
+
 export default function AdminDashboard({ onNavigateBack, onLogout, initialRole = 'owner' }) {
-  const { articles, matches, addArticle, updateArticle, deleteArticle, addMatch, updateMatch, deleteMatch } = useData();
+  const {
+    articles,
+    matches,
+    players,
+    addArticle,
+    updateArticle,
+    deleteArticle,
+    addMatch,
+    updateMatch,
+    deleteMatch,
+    addPlayer,
+    updatePlayer,
+    deletePlayer,
+  } = useData();
 
   // Role State: 'owner' vs 'admin'
   const [userRole, setUserRole] = useState(initialRole);
 
-  // Active Menu: 'dashboard', 'news', 'matches', 'links', 'roles', 'edit-article'
+  // Active Menu: 'dashboard', 'news', 'matches', 'players', 'links', 'roles', 'edit-article'
   const [activeMenu, setActiveMenu] = useState('dashboard');
   const [isDarkMode, setIsDarkMode] = useState(true);
 
   // Search & Filter States
   const [articleFilter, setArticleFilter] = useState('Semua');
   const [matchFilter, setMatchFilter] = useState('Semua');
+  const [playerFilter, setPlayerFilter] = useState('Semua');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Community Links State
@@ -65,7 +96,7 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
   const [showAddAdminModal, setShowAddAdminModal] = useState(false);
   const [newAdminForm, setNewAdminForm] = useState({ name: '', email: '', password: '', role: 'Editor', status: 'Aktif' });
 
-  // Match Modal State (Add & Edit Match)
+  // Match Modal State
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [editingMatch, setEditingMatch] = useState(null);
   const [matchForm, setMatchForm] = useState({
@@ -77,41 +108,63 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
     awayScore: 1,
     status: 'Completed',
     result: 'MENANG',
-    venue: 'Stamford Bridge'
+    venue: 'Stamford Bridge',
   });
 
-  // Dedicated Article Editor State
+  // Player Modal State (Add & Edit Squad Players + Flag Upload)
+  const [showPlayerModal, setShowPlayerModal] = useState(false);
+  const [editingPlayer, setEditingPlayer] = useState(null);
+  const [playerForm, setPlayerForm] = useState({
+    name: '',
+    number: '',
+    position: 'Attacking Midfielder',
+    flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+    flagUrl: '',
+    image: '',
+  });
+
+  // Editing Article Data
   const [editingArticleData, setEditingArticleData] = useState(null);
 
-  // Match Modal Trigger
-  const handleOpenMatchModal = (m = null) => {
-    if (m) {
-      setEditingMatch(m);
-      setMatchForm({
-        competition: m.competition || 'PREMIER LEAGUE',
-        date: m.date || '18 Jul 2026 • 21:00 WIB',
-        homeTeam: m.homeTeam || 'Chelsea',
-        homeScore: m.homeScore ?? 0,
-        awayTeam: m.awayTeam || 'Arsenal',
-        awayScore: m.awayScore ?? 0,
-        status: m.status || 'Upcoming',
-        result: m.result || '',
-        venue: m.venue || 'Stamford Bridge'
-      });
-    } else {
-      setEditingMatch(null);
-      setMatchForm({
-        competition: 'PREMIER LEAGUE',
-        date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + ' • 21:00 WIB',
-        homeTeam: 'Chelsea',
-        homeScore: '-',
-        awayTeam: 'Opponent FC',
-        awayScore: '-',
-        status: 'Upcoming',
-        result: '',
-        venue: 'Stamford Bridge'
-      });
-    }
+  // Filtered Lists
+  const filteredArticles = articles.filter((a) => {
+    const matchesFilter = articleFilter === 'Semua' || a.category === articleFilter || a.status === articleFilter.toLowerCase();
+    const matchesSearch = a.title.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
+
+  const filteredMatches = matches.filter((m) => {
+    const matchesFilter = matchFilter === 'Semua' || m.status === matchFilter;
+    const matchesSearch = `${m.homeTeam} ${m.awayTeam} ${m.competition}`.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
+
+  const filteredPlayers = (players || []).filter((p) => {
+    const matchesFilter = playerFilter === 'Semua' || p.position === playerFilter;
+    const matchesSearch = `${p.name} ${p.number} ${p.position}`.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
+
+  // Match Handlers
+  const handleOpenAddMatch = () => {
+    setEditingMatch(null);
+    setMatchForm({
+      competition: 'PREMIER LEAGUE',
+      date: '18 Jul 2026 • 21:00 WIB',
+      homeTeam: 'Chelsea',
+      homeScore: 3,
+      awayTeam: 'Arsenal',
+      awayScore: 1,
+      status: 'Completed',
+      result: 'MENANG',
+      venue: 'Stamford Bridge',
+    });
+    setShowMatchModal(true);
+  };
+
+  const handleOpenEditMatch = (match) => {
+    setEditingMatch(match);
+    setMatchForm({ ...match });
     setShowMatchModal(true);
   };
 
@@ -123,44 +176,92 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
       addMatch(matchForm);
     }
     setShowMatchModal(false);
-    setEditingMatch(null);
   };
 
-  // Open Article Editor
-  const handleOpenEditor = (art = null) => {
-    if (art) {
-      setEditingArticleData(art);
+  // Player Handlers
+  const handleOpenAddPlayer = () => {
+    setEditingPlayer(null);
+    setPlayerForm({
+      name: '',
+      number: '',
+      position: 'Attacking Midfielder',
+      flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+      flagUrl: '',
+      image: '',
+    });
+    setShowPlayerModal(true);
+  };
+
+  const handleOpenEditPlayer = (player) => {
+    setEditingPlayer(player);
+    setPlayerForm({
+      name: player.name || '',
+      number: player.number || '',
+      position: player.position || 'Attacking Midfielder',
+      flag: player.flag || '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+      flagUrl: player.flagUrl || '',
+      image: player.image || '',
+    });
+    setShowPlayerModal(true);
+  };
+
+  const handleSavePlayer = (e) => {
+    e.preventDefault();
+    if (!playerForm.name || !playerForm.number) return;
+    const payload = {
+      ...playerForm,
+      number: parseInt(playerForm.number, 10),
+    };
+    if (editingPlayer) {
+      updatePlayer(editingPlayer.id, payload);
     } else {
-      setEditingArticleData({
-        title: '',
-        category: 'MATCH REPORT',
-        author: userRole === 'owner' ? 'Owner Chelind' : 'Admin Chelind',
-        date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-        status: 'published',
-        content: '',
-        image: '',
-        tags: ['Chelsea', 'Premier League']
-      });
+      addPlayer(payload);
     }
+    setShowPlayerModal(false);
+  };
+
+  const handleFlagImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPlayerForm((prev) => ({ ...prev, flagUrl: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handlePlayerPhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPlayerForm((prev) => ({ ...prev, image: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Article Handlers
+  const handleOpenEditor = (article = null) => {
+    setEditingArticleData(article);
     setActiveMenu('edit-article');
   };
 
-  const handleSaveEditedArticle = (savedData) => {
-    if (savedData.id) {
-      updateArticle(savedData.id, savedData);
+  const handleSaveEditedArticle = (updatedArticle) => {
+    if (updatedArticle.id) {
+      updateArticle(updatedArticle.id, updatedArticle);
     } else {
-      addArticle(savedData);
+      addArticle(updatedArticle);
     }
     setActiveMenu('news');
     setEditingArticleData(null);
   };
 
-  const handleToggleLinkStatus = (id) => {
-    setCommunityLinks(communityLinks.map(l => (l.id === id ? { ...l, status: l.status === 'Aktif' ? 'Nonaktif' : 'Aktif' } : l)));
-  };
-
-  const handleAddAdmin = (e) => {
+  // Admin Role Handlers
+  const handleCreateAdmin = (e) => {
     e.preventDefault();
+    if (!newAdminForm.name || !newAdminForm.email || !newAdminForm.password) return;
     const newAdmin = {
       id: Date.now(),
       name: newAdminForm.name,
@@ -168,7 +269,7 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
       role: newAdminForm.role,
       status: newAdminForm.status,
       lastActive: 'Baru saja',
-      avatar: newAdminForm.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+      avatar: newAdminForm.name.slice(0, 2).toUpperCase(),
     };
     setAdminRoles([...adminRoles, newAdmin]);
     setShowAddAdminModal(false);
@@ -176,23 +277,8 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
   };
 
   const handleDeleteAdmin = (id) => {
-    setAdminRoles(adminRoles.filter(a => a.id !== id));
+    setAdminRoles(adminRoles.filter((a) => a.id !== id));
   };
-
-  // Filtered Articles List
-  const filteredArticles = articles.filter(a => {
-    const matchesFilter = articleFilter === 'Semua' || (articleFilter === 'Published' && a.status === 'published') || (articleFilter === 'Draft' && a.status === 'draft') || (a.category?.toUpperCase() === articleFilter.toUpperCase());
-    const matchesSearch = a.title.toLowerCase().includes(searchQuery.toLowerCase()) || a.author?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesFilter && matchesSearch;
-  });
-
-  // Filtered Matches List
-  const filteredMatches = matches.filter(m => {
-    if (matchFilter === 'Upcoming') return m.status === 'Upcoming';
-    if (matchFilter === 'Completed') return m.status === 'Completed';
-    if (matchFilter === 'Live') return m.status === 'Live';
-    return true;
-  });
 
   // Theme Classes
   const t = isDarkMode
@@ -223,7 +309,7 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
 
   return (
     <div className={`min-h-screen ${t.bg} font-poppins flex flex-col md:flex-row transition-colors duration-300 selection:bg-blue-600 selection:text-white`}>
-      {/* LEFT SIDEBAR (Matching Figma Screenshots 1-5 - Sticky Fixed Top Left) */}
+      {/* LEFT SIDEBAR - Sticky Fixed Top Left */}
       <aside className={`w-full md:w-64 shrink-0 ${t.sidebar} border-r flex flex-col justify-between p-6 z-30 md:sticky md:top-0 md:h-screen overflow-y-auto`}>
         <div>
           {/* Brand Logo - Sticky Pinned Top Left */}
@@ -244,7 +330,7 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
             MENU UTAMA
           </span>
 
-          {/* Navigation Items (Role Scoped: Admin hides Setelan Role, Owner shows Setelan Role) */}
+          {/* Navigation Items */}
           <nav className="space-y-1">
             <button
               onClick={() => setActiveMenu('dashboard')}
@@ -265,6 +351,13 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
               className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold transition-all ${activeMenu === 'matches' ? t.navActive : t.navInactive}`}
             >
               <Trophy className="w-4 h-4" /> Pusat Pertandingan
+            </button>
+
+            <button
+              onClick={() => setActiveMenu('players')}
+              className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold transition-all ${activeMenu === 'players' ? t.navActive : t.navInactive}`}
+            >
+              <Users className="w-4 h-4" /> Manajemen Pemain
             </button>
 
             <button
@@ -313,6 +406,7 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
               {activeMenu === 'dashboard' && `Dashboard ${userRole === 'owner' ? 'Owner' : 'Admin'}`}
               {activeMenu === 'news' && 'Manajemen Berita'}
               {activeMenu === 'matches' && 'Pusat Pertandingan'}
+              {activeMenu === 'players' && 'Manajemen Pemain Skuad Chelsea'}
               {activeMenu === 'links' && 'Tautan Komunitas'}
               {activeMenu === 'roles' && 'Setelan Role Admin'}
               {activeMenu === 'edit-article' && 'Edit Artikel'}
@@ -321,6 +415,7 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
               {activeMenu === 'dashboard' && `Selamat datang kembali, ${userRole === 'owner' ? 'Owner' : 'Admin'} Chelind`}
               {activeMenu === 'news' && 'Kelola semua artikel dan konten berita'}
               {activeMenu === 'matches' && 'Jadwal, hasil, dan rekap pertandingan Chelsea'}
+              {activeMenu === 'players' && 'Kelola daftar pemain, nomor punggung, dan bendera negara'}
               {activeMenu === 'links' && 'Kelola semua platform dan link komunitas Chelind'}
               {activeMenu === 'roles' && 'Kelola akun dan hak akses admin'}
               {activeMenu === 'edit-article' && 'Perubahan disimpan otomatis sebagai draft'}
@@ -373,101 +468,73 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
           {/* VIEW 1: DASHBOARD OVERVIEW */}
           {activeMenu === 'dashboard' && (
             <div className="space-y-8">
+              {/* Stat Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                <div className={`${t.card} rounded-2xl p-6 border relative overflow-hidden`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500"><FileText className="w-5 h-5" /></span>
-                    <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">+14 minggu ini</span>
+                <div className={`${t.card} p-5 rounded-2xl border flex items-center gap-4`}>
+                  <div className="w-12 h-12 rounded-xl bg-blue-500/15 text-blue-400 flex items-center justify-center">
+                    <FileText className="w-6 h-6" />
                   </div>
-                  <h3 className="text-3xl font-black mb-1">1,284</h3>
-                  <p className="text-xs text-slate-400 font-medium">Total Artikel</p>
+                  <div>
+                    <span className="text-xs text-slate-400 font-medium">Total Artikel</span>
+                    <h3 className="text-2xl font-black">{articles.length}</h3>
+                  </div>
                 </div>
 
-                <div className={`${t.card} rounded-2xl p-6 border relative overflow-hidden`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500"><Eye className="w-5 h-5" /></span>
-                    <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">+2.4k bulan ini</span>
+                <div className={`${t.card} p-5 rounded-2xl border flex items-center gap-4`}>
+                  <div className="w-12 h-12 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center">
+                    <Trophy className="w-6 h-6" />
                   </div>
-                  <h3 className="text-3xl font-black mb-1">48,320</h3>
-                  <p className="text-xs text-slate-400 font-medium">Total Klik Komunitas</p>
+                  <div>
+                    <span className="text-xs text-slate-400 font-medium font-medium">Pertandingan</span>
+                    <h3 className="text-2xl font-black">{matches.length}</h3>
+                  </div>
                 </div>
 
-                <div className={`${t.card} rounded-2xl p-6 border relative overflow-hidden`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500"><CheckCircle2 className="w-5 h-5" /></span>
-                    <span className="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">76.5% dari total</span>
+                <div className={`${t.card} p-5 rounded-2xl border flex items-center gap-4`}>
+                  <div className="w-12 h-12 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+                    <Users className="w-6 h-6" />
                   </div>
-                  <h3 className="text-3xl font-black mb-1">982</h3>
-                  <p className="text-xs text-slate-400 font-medium">Artikel Terpublikasi</p>
+                  <div>
+                    <span className="text-xs text-slate-400 font-medium">Pemain Skuad</span>
+                    <h3 className="text-2xl font-black">{(players || []).length}</h3>
+                  </div>
                 </div>
 
-                <div className={`${t.card} rounded-2xl p-6 border relative overflow-hidden`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="p-2.5 rounded-xl bg-rose-500/10 text-rose-500"><FileText className="w-5 h-5" /></span>
-                    <span className="text-[10px] font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full">23.5% dari total</span>
+                <div className={`${t.card} p-5 rounded-2xl border flex items-center gap-4`}>
+                  <div className="w-12 h-12 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center">
+                    <Share2 className="w-6 h-6" />
                   </div>
-                  <h3 className="text-3xl font-black mb-1">302</h3>
-                  <p className="text-xs text-slate-400 font-medium">Draft Menunggu</p>
+                  <div>
+                    <span className="text-xs text-slate-400 font-medium">Media Sosial</span>
+                    <h3 className="text-2xl font-black">{communityLinks.length}</h3>
+                  </div>
                 </div>
               </div>
 
-              {/* Articles Table */}
-              <div className={`${t.card} rounded-2xl border overflow-hidden`}>
-                <div className={`p-6 border-b ${t.cardHeader} flex items-center justify-between`}>
-                  <div>
-                    <h3 className="text-base font-bold">Postingan Berita Terbaru</h3>
-                    <p className="text-xs text-slate-400 mt-0.5">{articles.length} artikel ditemukan</p>
+              {/* Quick Actions Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div onClick={() => handleOpenEditor()} className={`${t.card} p-6 rounded-2xl border cursor-pointer hover:border-blue-500 transition-all group`}>
+                  <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <Plus className="w-5 h-5" />
                   </div>
-
-                  <button onClick={() => handleOpenEditor()} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md transition-all">
-                    <Plus className="w-4 h-4" /> Tambah Artikel
-                  </button>
+                  <h3 className="text-base font-bold mb-1">Tulis Artikel Baru</h3>
+                  <p className="text-xs text-slate-400">Buat berita, laporan pertandingan, atau transfer news baru.</p>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-800/30 text-slate-400 font-extrabold tracking-wider uppercase border-b border-slate-800">
-                      <tr>
-                        <th className="p-4">JUDUL ARTIKEL</th>
-                        <th className="p-4">KATEGORI</th>
-                        <th className="p-4">PENULIS</th>
-                        <th className="p-4">TANGGAL</th>
-                        <th className="p-4">VIEWS</th>
-                        <th className="p-4">STATUS</th>
-                        <th className="p-4 text-right">AKSI</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-800/40">
-                      {articles.map((art) => (
-                        <tr key={art.id} className={t.tableRow}>
-                          <td className="p-4 font-bold text-sm max-w-xs truncate">{art.title}</td>
-                          <td className="p-4">
-                            <span className="px-2.5 py-1 rounded text-[10px] font-extrabold bg-blue-500/15 text-blue-400 border border-blue-500/30 uppercase">
-                              {art.category}
-                            </span>
-                          </td>
-                          <td className="p-4 text-slate-400">{art.author || 'Admin Chelind'}</td>
-                          <td className="p-4 text-slate-400">{art.date}</td>
-                          <td className="p-4 font-mono">12.480</td>
-                          <td className="p-4">
-                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${art.status === 'published' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-amber-500/15 text-amber-400'}`}>
-                              {art.status === 'published' ? 'Published' : 'Draft'}
-                            </span>
-                          </td>
-                          <td className="p-4 text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <button onClick={() => handleOpenEditor(art)} className="p-1.5 rounded hover:bg-blue-600/20 text-slate-400 hover:text-blue-400">
-                                <Edit2 className="w-3.5 h-3.5" />
-                              </button>
-                              <button onClick={() => deleteArticle(art.id)} className="p-1.5 rounded hover:bg-red-600/20 text-slate-400 hover:text-red-400">
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div onClick={() => handleOpenAddMatch()} className={`${t.card} p-6 rounded-2xl border cursor-pointer hover:border-amber-500 transition-all group`}>
+                  <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <Trophy className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-base font-bold mb-1">Tambah Jadwal Laga</h3>
+                  <p className="text-xs text-slate-400">Input jadwal pertandingan mendatang atau hasil skor Chelsea.</p>
+                </div>
+
+                <div onClick={() => handleOpenAddPlayer()} className={`${t.card} p-6 rounded-2xl border cursor-pointer hover:border-emerald-500 transition-all group`}>
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <Users className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-base font-bold mb-1">Tambah Pemain Skuad</h3>
+                  <p className="text-xs text-slate-400">Kelola pemain Chelsea, nomor punggung, dan bendera negara.</p>
                 </div>
               </div>
             </div>
@@ -476,23 +543,21 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
           {/* VIEW 2: MANAJEMEN BERITA */}
           {activeMenu === 'news' && (
             <div className="space-y-6">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className={`${t.card} rounded-2xl p-5 border flex items-center gap-4`}>
                   <div className="w-10 h-10 rounded-xl bg-blue-500/15 text-blue-400 flex items-center justify-center font-bold text-lg">{articles.length}</div>
                   <div>
                     <h4 className="text-sm font-bold">Total Artikel</h4>
-                    <p className="text-[11px] text-slate-400">Semua artikel terdaftar</p>
+                    <p className="text-[11px] text-slate-400">Telah dibuat</p>
                   </div>
                 </div>
-
                 <div className={`${t.card} rounded-2xl p-5 border flex items-center gap-4`}>
                   <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center font-bold text-lg">{articles.filter(a => a.status === 'published').length}</div>
                   <div>
                     <h4 className="text-sm font-bold">Published</h4>
-                    <p className="text-[11px] text-slate-400">Tampil di web</p>
+                    <p className="text-[11px] text-slate-400">Tayang di website</p>
                   </div>
                 </div>
-
                 <div className={`${t.card} rounded-2xl p-5 border flex items-center gap-4`}>
                   <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center font-bold text-lg">{articles.filter(a => a.status === 'draft').length}</div>
                   <div>
@@ -570,10 +635,9 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
             </div>
           )}
 
-          {/* VIEW 3: PUSAT PERTANDINGAN (FULL CRUD FOR MATCHES) */}
+          {/* VIEW 3: PUSAT PERTANDINGAN */}
           {activeMenu === 'matches' && (
             <div className="space-y-6">
-              {/* Stat Header Cards */}
               <div className="grid grid-cols-3 gap-4">
                 <div className={`${t.card} rounded-2xl p-5 border flex items-center gap-4`}>
                   <div className="w-10 h-10 rounded-xl bg-blue-500/15 text-blue-400 flex items-center justify-center font-bold text-lg">{matches.length}</div>
@@ -598,112 +662,22 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
                 </div>
               </div>
 
-              {/* Match Schedule Table */}
               <div className={`${t.card} rounded-2xl border overflow-hidden`}>
                 <div className={`p-6 border-b ${t.cardHeader} flex flex-col md:flex-row md:items-center justify-between gap-4`}>
-                  <div className="flex items-center gap-2">
-                    {['Semua', 'Upcoming', 'Completed', 'Live'].map((filter) => (
+                  <div className="flex flex-wrap items-center gap-2">
+                    {['Semua', 'Upcoming', 'Completed'].map((tab) => (
                       <button
-                        key={filter}
-                        onClick={() => setMatchFilter(filter)}
-                        className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${matchFilter === filter ? 'bg-blue-600 text-white shadow' : 'bg-slate-800/40 text-slate-400 hover:text-white'}`}
+                        key={tab}
+                        onClick={() => setMatchFilter(tab)}
+                        className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${matchFilter === tab ? 'bg-blue-600 text-white shadow' : 'bg-slate-800/40 text-slate-400 hover:text-white'}`}
                       >
-                        {filter}
+                        {tab === 'Upcoming' ? 'Jadwal Mendatang' : tab === 'Completed' ? 'Hasil Laga' : 'Semua Laga'}
                       </button>
                     ))}
                   </div>
 
-                  <button
-                    onClick={() => handleOpenMatchModal()}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md transition-all shrink-0"
-                  >
-                    <Plus className="w-4 h-4" /> Tambah Jadwal
-                  </button>
-                </div>
-
-                <div className="divide-y divide-slate-800/40">
-                  {filteredMatches.map((m) => (
-                    <div key={m.id} className={`p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 ${t.tableRow}`}>
-                      <div>
-                        <span className="text-[10px] font-bold text-blue-400 tracking-wider uppercase block mb-1">
-                          {m.competition} • {m.date}
-                        </span>
-                        <div className="flex items-center gap-4 text-sm font-extrabold text-white">
-                          <span>{m.homeTeam}</span>
-                          <span className="px-3 py-1 bg-slate-900 border border-slate-800 rounded-lg text-xs font-mono text-blue-400">{m.homeScore} - {m.awayScore}</span>
-                          <span>{m.awayTeam}</span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-4">
-                        <span className={`px-3.5 py-1 rounded-full text-[10px] font-extrabold uppercase ${m.status === 'Completed' ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-blue-500/15 text-blue-400 border border-blue-500/30'}`}>
-                          {m.status} {m.result && `• ${m.result}`}
-                        </span>
-                        <span className="text-xs text-slate-400 hidden sm:inline">{m.venue}</span>
-
-                        {/* EDIT & DELETE MATCH BUTTONS */}
-                        <div className="flex items-center gap-1.5 pl-2 border-l border-slate-800">
-                          <button
-                            onClick={() => handleOpenMatchModal(m)}
-                            className="p-2 rounded-lg bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white transition-colors"
-                            title="Edit Jadwal/Skor Laga"
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => deleteMatch(m.id)}
-                            className="p-2 rounded-lg bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white transition-colors"
-                            title="Hapus Jadwal"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* VIEW 4: TAUTAN KOMUNITAS */}
-          {activeMenu === 'links' && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-3 gap-4">
-                <div className={`${t.card} rounded-2xl p-5 border flex items-center gap-4`}>
-                  <div className="w-10 h-10 rounded-xl bg-blue-500/15 text-blue-400 flex items-center justify-center font-bold text-lg">6</div>
-                  <div>
-                    <h4 className="text-sm font-bold">Total Platform</h4>
-                    <p className="text-[11px] text-slate-400">Platform sosial terhubung</p>
-                  </div>
-                </div>
-
-                <div className={`${t.card} rounded-2xl p-5 border flex items-center gap-4`}>
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center font-bold text-lg">65.364</div>
-                  <div>
-                    <h4 className="text-sm font-bold">Total Member</h4>
-                    <p className="text-[11px] text-slate-400">Total pengikut komunitas</p>
-                  </div>
-                </div>
-
-                <div className={`${t.card} rounded-2xl p-5 border flex items-center gap-4`}>
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center font-bold text-lg">5</div>
-                  <div>
-                    <h4 className="text-sm font-bold">Link Aktif</h4>
-                    <p className="text-[11px] text-slate-400">Tampil di halaman publik</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className={`${t.card} rounded-2xl border overflow-hidden`}>
-                <div className={`p-6 border-b ${t.cardHeader} flex items-center justify-between`}>
-                  <div>
-                    <h3 className="text-base font-bold">Manajemen Tautan Komunitas</h3>
-                    <p className="text-xs text-slate-400 mt-0.5">6 platform terdaftar</p>
-                  </div>
-
-                  <button className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white shadow">
-                    <Plus className="w-4 h-4" /> Tambah Tautan
+                  <button onClick={handleOpenAddMatch} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md transition-all shrink-0">
+                    <Plus className="w-4 h-4" /> Tambah Jadwal Baru
                   </button>
                 </div>
 
@@ -711,44 +685,37 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
                   <table className="w-full text-left text-xs">
                     <thead className="bg-slate-800/30 text-slate-400 font-extrabold tracking-wider uppercase border-b border-slate-800">
                       <tr>
-                        <th className="p-4">PLATFORM</th>
-                        <th className="p-4">NAMA & DESKRIPSI</th>
-                        <th className="p-4">URL TAUTAN</th>
-                        <th className="p-4">ANGGOTA</th>
+                        <th className="p-4">KOMPETISI</th>
+                        <th className="p-4">PERTANDINGAN (HOME VS AWAY)</th>
+                        <th className="p-4">SKOR</th>
+                        <th className="p-4">STADION / VENUE</th>
                         <th className="p-4">STATUS</th>
                         <th className="p-4 text-right">AKSI</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/40">
-                      {communityLinks.map((l) => (
-                        <tr key={l.id} className={t.tableRow}>
+                      {filteredMatches.map((m) => (
+                        <tr key={m.id} className={t.tableRow}>
+                          <td className="p-4 font-bold text-blue-400">{m.competition}</td>
+                          <td className="p-4 font-bold text-sm">
+                            {m.homeTeam} <span className="text-slate-500 font-normal">vs</span> {m.awayTeam}
+                          </td>
+                          <td className="p-4 font-mono font-bold text-sm text-amber-400">
+                            {m.homeScore} - {m.awayScore}
+                          </td>
+                          <td className="p-4 text-slate-400">{m.venue}</td>
                           <td className="p-4">
-                            <span className={`px-2.5 py-1 rounded text-[10px] font-extrabold ${l.color}`}>
-                              {l.platform}
+                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${m.status === 'Completed' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-blue-500/15 text-blue-400'}`}>
+                              {m.status === 'Completed' ? 'Selesai' : 'Mendatang'}
                             </span>
-                          </td>
-                          <td className="p-4">
-                            <p className="font-bold text-white text-xs">{l.name}</p>
-                            <p className="text-[10px] text-slate-400">{l.desc}</p>
-                          </td>
-                          <td className="p-4 font-mono text-[11px] text-blue-400 underline truncate max-w-xs">
-                            <a href={l.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
-                              {l.url} <ExternalLink className="w-3 h-3" />
-                            </a>
-                          </td>
-                          <td className="p-4 font-mono font-bold text-white">{l.members}</td>
-                          <td className="p-4">
-                            <button
-                              onClick={() => handleToggleLinkStatus(l.id)}
-                              className={`px-3 py-1 rounded-full text-[10px] font-bold transition-all ${l.status === 'Aktif' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-800 text-slate-400'}`}
-                            >
-                              {l.status}
-                            </button>
                           </td>
                           <td className="p-4 text-right">
                             <div className="flex items-center justify-end gap-2">
-                              <button className="p-1.5 rounded hover:bg-blue-600/20 text-slate-400 hover:text-blue-400">
+                              <button onClick={() => handleOpenEditMatch(m)} className="p-1.5 rounded hover:bg-blue-600/20 text-slate-400 hover:text-blue-400">
                                 <Edit2 className="w-3.5 h-3.5" />
+                              </button>
+                              <button onClick={() => deleteMatch(m.id)} className="p-1.5 rounded hover:bg-red-600/20 text-slate-400 hover:text-red-400">
+                                <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </div>
                           </td>
@@ -761,21 +728,144 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
             </div>
           )}
 
-          {/* VIEW 5: SETELAN ROLE ADMIN (ONLY FOR OWNER) */}
+          {/* VIEW 4: MANAJEMEN PEMAIN (SQUAD PLAYERS & BENDERA NEGARA CRUD) */}
+          {activeMenu === 'players' && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  {['Semua', 'Goalkeeper', 'Defender', 'Attacking Midfielder', 'Central Midfielder', 'Forward', 'Striker'].map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setPlayerFilter(tab)}
+                      className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${playerFilter === tab ? 'bg-blue-600 text-white shadow' : 'bg-slate-800/40 text-slate-400 hover:text-white'}`}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={handleOpenAddPlayer}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md transition-all shrink-0"
+                >
+                  <Plus className="w-4 h-4" /> Tambah Pemain Baru
+                </button>
+              </div>
+
+              {/* Grid Player Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {filteredPlayers.map((player) => (
+                  <div
+                    key={player.id}
+                    className={`${t.card} rounded-2xl overflow-hidden border flex flex-col group relative`}
+                  >
+                    {/* Player Image & Overlay Badge */}
+                    <div className="aspect-[3/4] relative overflow-hidden bg-slate-950">
+                      <img
+                        src={player.image || 'assets/news/cole palmer.jpg'}
+                        alt={player.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      {/* Top Left: Shirt Number */}
+                      <span className="absolute top-3 left-3 bg-blue-600 text-white text-xs font-black px-2.5 py-1 rounded-md shadow">
+                        #{player.number}
+                      </span>
+
+                      {/* Top Right: Country Flag Badge (Uploaded Flag or Emoji) */}
+                      <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm px-2 py-1 rounded-lg border border-white/20 shadow flex items-center justify-center">
+                        {player.flagUrl ? (
+                          <img src={player.flagUrl} alt="Bendera" className="w-5 h-3.5 object-cover rounded-sm" />
+                        ) : (
+                          <span className="text-base leading-none">{player.flag || '🏴󠁧󠁢󠁥󠁮󠁧󠁿'}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Player Details */}
+                    <div className="p-5 flex flex-col justify-between flex-1">
+                      <div>
+                        <span className="text-[10px] font-extrabold text-blue-400 uppercase tracking-wider block mb-1">
+                          {player.position}
+                        </span>
+                        <h3 className="text-base font-bold text-white leading-tight mb-4">
+                          {player.name}
+                        </h3>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="pt-3 border-t border-slate-800/60 flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleOpenEditPlayer(player)}
+                          className="px-3 py-1.5 rounded-lg bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white transition-all text-xs font-bold flex items-center gap-1"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" /> Edit
+                        </button>
+                        <button
+                          onClick={() => deletePlayer(player.id)}
+                          className="px-3 py-1.5 rounded-lg bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white transition-all text-xs font-bold flex items-center gap-1"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" /> Hapus
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* VIEW 5: TAUTAN KOMUNITAS */}
+          {activeMenu === 'links' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {communityLinks.map((link) => (
+                  <div key={link.id} className={`${t.card} p-6 rounded-2xl border space-y-4`}>
+                    <div className="flex items-center justify-between">
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-extrabold ${link.color}`}>
+                        {link.platform}
+                      </span>
+                      <span className={`text-[10px] font-bold ${link.status === 'Aktif' ? 'text-emerald-400' : 'text-slate-500'}`}>
+                        ● {link.status}
+                      </span>
+                    </div>
+
+                    <div>
+                      <h3 className="text-base font-bold">{link.name}</h3>
+                      <p className="text-xs text-slate-400 mt-1">{link.desc}</p>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs">
+                      <span className="text-slate-400 font-mono">{link.members} Anggota</span>
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1"
+                      >
+                        Buka <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* VIEW 6: SETELAN ROLE ADMIN (OWNER ONLY) */}
           {activeMenu === 'roles' && userRole === 'owner' && (
             <div className="space-y-6">
               <div className={`${t.card} rounded-2xl border overflow-hidden`}>
                 <div className={`p-6 border-b ${t.cardHeader} flex items-center justify-between`}>
                   <div>
-                    <h3 className="text-base font-bold">Daftar Akun Admin</h3>
-                    <p className="text-xs text-slate-400 mt-0.5">{adminRoles.length} akun terdaftar</p>
+                    <h3 className="text-base font-bold">Daftar Akun Pengelola Chelind</h3>
+                    <p className="text-xs text-slate-400">Atur hak akses dan buat akun admin/editor baru</p>
                   </div>
 
                   <button
                     onClick={() => setShowAddAdminModal(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow transition-all"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md transition-all"
                   >
-                    <Plus className="w-4 h-4" /> Tambah Admin
+                    <UserCheck className="w-4 h-4" /> Tambah Admin Baru
                   </button>
                 </div>
 
@@ -783,9 +873,9 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
                   <table className="w-full text-left text-xs">
                     <thead className="bg-slate-800/30 text-slate-400 font-extrabold tracking-wider uppercase border-b border-slate-800">
                       <tr>
-                        <th className="p-4">NAMA ADMIN</th>
+                        <th className="p-4">NAMA PENGELOLA</th>
                         <th className="p-4">EMAIL</th>
-                        <th className="p-4">ROLE</th>
+                        <th className="p-4">ROLE HAK AKSES</th>
                         <th className="p-4">STATUS</th>
                         <th className="p-4">TERAKHIR AKTIF</th>
                         <th className="p-4 text-right">AKSI</th>
@@ -795,7 +885,7 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
                       {adminRoles.map((a) => (
                         <tr key={a.id} className={t.tableRow}>
                           <td className="p-4 font-bold flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-extrabold text-xs">
+                            <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center">
                               {a.avatar}
                             </div>
                             <span>{a.name}</span>
@@ -828,7 +918,163 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
         </main>
       </div>
 
-      {/* MODAL TAMBAH / EDIT MATCH (PUSAT PERTANDINGAN CRUD) */}
+      {/* MODAL TAMBAH / EDIT PEMAIN SKUAD & BENDERA NEGARA */}
+      {showPlayerModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 sm:p-8 relative text-white max-h-[90vh] overflow-y-auto">
+            <button onClick={() => setShowPlayerModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white">
+              <X className="w-5 h-5" />
+            </button>
+            <h3 className="text-xl font-bold mb-6">
+              {editingPlayer ? 'Edit Data Pemain Chelsea' : 'Tambah Pemain Baru'}
+            </h3>
+
+            <form onSubmit={handleSavePlayer} className="space-y-5 text-xs">
+              <div>
+                <label className="block text-slate-300 font-bold mb-1">Nama Pemain</label>
+                <input
+                  type="text"
+                  required
+                  value={playerForm.name}
+                  onChange={(e) => setPlayerForm({ ...playerForm, name: e.target.value })}
+                  placeholder="Misal: Cole Palmer / Kylian Mbappe"
+                  className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none focus:border-blue-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-slate-300 font-bold mb-1">Nomor Punggung (#)</label>
+                  <input
+                    type="number"
+                    required
+                    value={playerForm.number}
+                    onChange={(e) => setPlayerForm({ ...playerForm, number: e.target.value })}
+                    placeholder="20"
+                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none focus:border-blue-500 font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-bold mb-1">Posisi Pemain</label>
+                  <select
+                    value={playerForm.position}
+                    onChange={(e) => setPlayerForm({ ...playerForm, position: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none focus:border-blue-500"
+                  >
+                    <option value="Goalkeeper">Goalkeeper</option>
+                    <option value="Defender">Defender</option>
+                    <option value="Attacking Midfielder">Attacking Midfielder</option>
+                    <option value="Central Midfielder">Central Midfielder</option>
+                    <option value="Forward">Forward</option>
+                    <option value="Striker">Striker</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* BENDERA NEGARA SECTION (IMAGE UPLOAD + EMOJI SELECTOR) */}
+              <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-slate-300 font-bold flex items-center gap-1.5">
+                    <Flag className="w-4 h-4 text-blue-400" /> Bendera Negara Pemain
+                  </label>
+                  <span className="text-[10px] text-slate-400">Tampil di pojok kanan kartu</span>
+                </div>
+
+                {/* Preset Emoji Picker */}
+                <div>
+                  <span className="text-[10px] text-slate-400 block mb-2">Pilih Bendera Cepat:</span>
+                  <div className="flex flex-wrap gap-2">
+                    {PRESET_FLAGS.map((f) => (
+                      <button
+                        type="button"
+                        key={f.code}
+                        onClick={() => setPlayerForm({ ...playerForm, flag: f.code, flagUrl: '' })}
+                        className={`px-2.5 py-1 rounded-lg border text-sm flex items-center gap-1 transition-all ${
+                          playerForm.flag === f.code && !playerForm.flagUrl
+                            ? 'bg-blue-600/30 border-blue-500 text-white shadow'
+                            : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700'
+                        }`}
+                      >
+                        <span>{f.code}</span> <span className="text-[10px]">{f.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Custom Upload Flag Image */}
+                <div className="pt-2 border-t border-slate-800/80">
+                  <label className="block text-[11px] text-slate-300 font-bold mb-1.5">
+                    Atau Unggah Gambar Bendera Sendiri (PNG/JPG/SVG):
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <label className="cursor-pointer px-4 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-lg text-xs font-bold flex items-center gap-2 text-slate-200 transition-colors">
+                      <Upload className="w-3.5 h-3.5 text-blue-400" /> Unggah Bendera
+                      <input type="file" accept="image/*" onChange={handleFlagImageUpload} className="hidden" />
+                    </label>
+
+                    {playerForm.flagUrl ? (
+                      <div className="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700">
+                        <img src={playerForm.flagUrl} alt="Preview" className="w-6 h-4 object-cover rounded-sm" />
+                        <span className="text-[10px] text-emerald-400 font-bold">Terpasang</span>
+                        <button
+                          type="button"
+                          onClick={() => setPlayerForm({ ...playerForm, flagUrl: '' })}
+                          className="text-slate-400 hover:text-red-400 ml-1"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-[11px] text-slate-400">
+                        Aktif: <span className="text-base">{playerForm.flag || '🏴󠁧󠁢󠁥󠁮󠁧󠁿'}</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* FOTO PEMAIN SECTION */}
+              <div>
+                <label className="block text-slate-300 font-bold mb-1">Foto Pemain (URL atau Unggah File)</label>
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={playerForm.image}
+                    onChange={(e) => setPlayerForm({ ...playerForm, image: e.target.value })}
+                    placeholder="assets/news/cole palmer.jpg atau URL foto"
+                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none focus:border-blue-500"
+                  />
+                  <div className="flex items-center justify-between">
+                    <label className="cursor-pointer text-xs text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1">
+                      <Upload className="w-3.5 h-3.5" /> Pilih File Foto dari Komputer
+                      <input type="file" accept="image/*" onChange={handlePlayerPhotoUpload} className="hidden" />
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowPlayerModal(false)}
+                  className="px-5 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold text-white shadow-md transition-all"
+                >
+                  {editingPlayer ? 'Simpan Perubahan' : 'Tambah Pemain'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL TAMBAH / EDIT MATCH */}
       {showMatchModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 sm:p-8 relative text-white">
@@ -918,45 +1164,35 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
                     onChange={(e) => setMatchForm({ ...matchForm, status: e.target.value })}
                     className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none focus:border-blue-500"
                   >
-                    <option value="Upcoming">Upcoming</option>
-                    <option value="Completed">Completed</option>
-                    <option value="Live">Live</option>
+                    <option value="Completed">Selesai (Completed)</option>
+                    <option value="Upcoming">Mendatang (Upcoming)</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-bold mb-1">Hasil (Result)</label>
-                  <select
-                    value={matchForm.result}
-                    onChange={(e) => setMatchForm({ ...matchForm, result: e.target.value })}
+                  <label className="block text-slate-300 font-bold mb-1">Stadion / Venue</label>
+                  <input
+                    type="text"
+                    value={matchForm.venue}
+                    onChange={(e) => setMatchForm({ ...matchForm, venue: e.target.value })}
                     className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none focus:border-blue-500"
-                  >
-                    <option value="">(Belum Ada / Upcoming)</option>
-                    <option value="MENANG">MENANG</option>
-                    <option value="IMBANG">IMBANG</option>
-                    <option value="KALAH">KALAH</option>
-                  </select>
+                  />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-slate-300 font-bold mb-1">Stadion / Venue</label>
-                <input
-                  type="text"
-                  required
-                  value={matchForm.venue}
-                  onChange={(e) => setMatchForm({ ...matchForm, venue: e.target.value })}
-                  placeholder="Stamford Bridge"
-                  className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none focus:border-blue-500"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-800">
-                <button type="button" onClick={() => setShowMatchModal(false)} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowMatchModal(false)}
+                  className="px-5 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+                >
                   Batal
                 </button>
-                <button type="submit" className="px-5 py-2 rounded-xl bg-blue-600 text-white font-bold shadow">
-                  Simpan Jadwal
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold text-white shadow-md transition-all"
+                >
+                  {editingMatch ? 'Simpan Perubahan' : 'Tambah Pertandingan'}
                 </button>
               </div>
             </form>
@@ -964,55 +1200,55 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
         </div>
       )}
 
-      {/* MODAL TAMBAH ADMIN (DILENGKAPI INPUT PASSWORD & DATA LENGKAP) */}
+      {/* MODAL TAMBAH ADMIN BARU */}
       {showAddAdminModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 sm:p-8 relative text-white">
             <button onClick={() => setShowAddAdminModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white">
               <X className="w-5 h-5" />
             </button>
-            <h3 className="text-xl font-bold mb-6">Tambah Akun Admin Baru</h3>
+            <h3 className="text-xl font-bold mb-6">Tambah Akun Pengelola Baru</h3>
 
-            <form onSubmit={handleAddAdmin} className="space-y-4 text-xs">
+            <form onSubmit={handleCreateAdmin} className="space-y-4 text-xs">
               <div>
-                <label className="block text-slate-300 font-bold mb-1">Nama Admin</label>
+                <label className="block text-slate-300 font-bold mb-1">Nama Lengkap Pengelola</label>
                 <input
                   type="text"
                   required
                   value={newAdminForm.name}
                   onChange={(e) => setNewAdminForm({ ...newAdminForm, name: e.target.value })}
-                  placeholder="Contoh: Andi Pratama"
+                  placeholder="Misal: Ahmad Fauzi"
                   className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-bold mb-1">Email</label>
+                <label className="block text-slate-300 font-bold mb-1">Email / Username Login</label>
                 <input
                   type="email"
                   required
                   value={newAdminForm.email}
                   onChange={(e) => setNewAdminForm({ ...newAdminForm, email: e.target.value })}
-                  placeholder="andi@chelind.id"
+                  placeholder="ahmad@chelind.id"
                   className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-bold mb-1">Password</label>
+                <label className="block text-slate-300 font-bold mb-1">Password Baru</label>
                 <input
                   type="password"
                   required
                   value={newAdminForm.password}
                   onChange={(e) => setNewAdminForm({ ...newAdminForm, password: e.target.value })}
-                  placeholder="Ketik password untuk admin..."
+                  placeholder="••••••••"
                   className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none focus:border-blue-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-slate-300 font-bold mb-1">Role</label>
+                  <label className="block text-slate-300 font-bold mb-1">Role Hak Akses</label>
                   <select
                     value={newAdminForm.role}
                     onChange={(e) => setNewAdminForm({ ...newAdminForm, role: e.target.value })}
@@ -1025,7 +1261,7 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-bold mb-1">Status</label>
+                  <label className="block text-slate-300 font-bold mb-1">Status Akun</label>
                   <select
                     value={newAdminForm.status}
                     onChange={(e) => setNewAdminForm({ ...newAdminForm, status: e.target.value })}
@@ -1037,12 +1273,19 @@ export default function AdminDashboard({ onNavigateBack, onLogout, initialRole =
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-800">
-                <button type="button" onClick={() => setShowAddAdminModal(false)} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowAddAdminModal(false)}
+                  className="px-5 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+                >
                   Batal
                 </button>
-                <button type="submit" className="px-5 py-2 rounded-xl bg-blue-600 text-white font-bold shadow">
-                  Simpan Admin
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold text-white shadow-md transition-all"
+                >
+                  Simpan Akun
                 </button>
               </div>
             </form>

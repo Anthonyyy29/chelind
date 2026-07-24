@@ -66,6 +66,14 @@ const INITIAL_MATCHES = [
   { id: 7, competition: 'PREMIER LEAGUE', date: '1 Jul 2026 • 22:00 WIB', homeTeam: 'Chelsea', homeScore: 2, awayTeam: 'Brentford', awayScore: 0, status: 'Completed', result: 'MENANG', venue: 'Stamford Bridge' },
 ];
 
+const INITIAL_PLAYERS = [
+  { id: 1, name: 'Filip Jorgensen', number: 1, position: 'Goalkeeper', flag: '🇩🇰', flagUrl: '', image: 'assets/news/Filip jorgenson .jpg' },
+  { id: 2, name: 'Cole Palmer', number: 20, position: 'Attacking Midfielder', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', flagUrl: '', image: 'assets/news/cole palmer.jpg' },
+  { id: 3, name: 'Joao Pedro', number: 10, position: 'Forward', flag: '🇧🇷', flagUrl: '', image: 'assets/news/joao pedro.jpg' },
+  { id: 4, name: 'Enzo Fernandez', number: 8, position: 'Central Midfielder', flag: '🇦🇷', flagUrl: '', image: 'assets/news/enzo fernandes.jpg' },
+  { id: 5, name: 'Liam Delap', number: 9, position: 'Striker', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', flagUrl: '', image: 'assets/news/Liam delap.jpg' },
+];
+
 export function DataProvider({ children }) {
   const [articles, setArticles] = useState(() => {
     const saved = localStorage.getItem('chelind_articles');
@@ -77,6 +85,11 @@ export function DataProvider({ children }) {
     return saved ? JSON.parse(saved) : INITIAL_MATCHES;
   });
 
+  const [players, setPlayers] = useState(() => {
+    const saved = localStorage.getItem('chelind_players');
+    return saved ? JSON.parse(saved) : INITIAL_PLAYERS;
+  });
+
   useEffect(() => {
     localStorage.setItem('chelind_articles', JSON.stringify(articles));
   }, [articles]);
@@ -84,6 +97,10 @@ export function DataProvider({ children }) {
   useEffect(() => {
     localStorage.setItem('chelind_matches', JSON.stringify(matches));
   }, [matches]);
+
+  useEffect(() => {
+    localStorage.setItem('chelind_players', JSON.stringify(players));
+  }, [players]);
 
   // CRUD Articles
   const addArticle = (newArticle) => {
@@ -121,17 +138,35 @@ export function DataProvider({ children }) {
     setMatches(matches.filter((m) => m.id !== id));
   };
 
+  // CRUD Players
+  const addPlayer = (newPlayer) => {
+    const player = { ...newPlayer, id: Date.now() };
+    setPlayers([...players, player]);
+  };
+
+  const updatePlayer = (id, updatedFields) => {
+    setPlayers(players.map((p) => (p.id === id ? { ...p, ...updatedFields } : p)));
+  };
+
+  const deletePlayer = (id) => {
+    setPlayers(players.filter((p) => p.id !== id));
+  };
+
   return (
     <DataContext.Provider
       value={{
         articles,
         matches,
+        players,
         addArticle,
         updateArticle,
         deleteArticle,
         addMatch,
         updateMatch,
         deleteMatch,
+        addPlayer,
+        updatePlayer,
+        deletePlayer,
       }}
     >
       {children}

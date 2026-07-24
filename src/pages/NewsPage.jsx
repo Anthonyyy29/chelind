@@ -142,10 +142,19 @@ export default function NewsPage({ onSelectArticle }) {
                     alt={player.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <span className="absolute top-2 left-2 text-sm">{player.flag || '🏴󠁧󠁢󠁥󠁮󠁧󠁿'}</span>
-                  <span className="absolute top-2 right-2 text-base font-black text-white drop-shadow-md">
-                    {player.number}
+                  {/* Top Left: Shirt Number */}
+                  <span className="absolute top-2.5 left-2.5 bg-blue-600/90 text-white text-[11px] font-black px-2 py-0.5 rounded shadow">
+                    #{player.number}
                   </span>
+
+                  {/* Top Right: Country Flag (Uploaded Flag Image or Emoji) */}
+                  <div className="absolute top-2.5 right-2.5 bg-black/60 backdrop-blur-sm p-1 rounded-md border border-white/20 shadow flex items-center justify-center">
+                    {player.flagUrl ? (
+                      <img src={player.flagUrl} alt="Bendera" className="w-5 h-3.5 object-cover rounded-sm" />
+                    ) : (
+                      <span className="text-base leading-none">{player.flag || '🏴󠁧󠁢󠁥󠁮󠁧󠁿'}</span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="p-4 bg-white flex flex-col justify-between flex-1">
