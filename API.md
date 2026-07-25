@@ -142,6 +142,15 @@ pakai satu URL tetap karena timnya selalu sama.
 > asli, endpoint ini akan selalu balikin `data: []` — bukan berarti endpointnya
 > rusak.
 
+### `GET /api/players`
+
+Hanya pemain `is_active = true`, urut nama A-Z.
+
+```json
+{ "data": [{ "id": 1, "name": "Cole Palmer", "position": "Attacking Midfielder",
+             "photo": "https://.../storage/players/xxx.jpg", "is_active": true }] }
+```
+
 ---
 
 ## 3. Endpoint Admin (wajib login, prefix `/api/admin`)
@@ -211,6 +220,27 @@ Catatan:
 
 Tidak ada field `status`/jumlah member — itu tidak ada di skema tabel `social_links`.
 
+### Pemain — `/api/admin/players`
+
+| Method | Path | Body | Sukses |
+|---|---|---|---|
+| GET | `/` | — | `200`, semua pemain (termasuk nonaktif), urut nama, tanpa pagination |
+| POST | `/` | `multipart/form-data`, lihat di bawah | `201`, `{ "data": {...} }` |
+| PUT/PATCH | `/{id}` | field opsional, `sometimes` | `200`, `{ "data": {...} }` |
+| DELETE | `/{id}` | — | `204`. Foto ikut terhapus dari storage |
+
+**Body create:**
+
+| Field | Aturan |
+|---|---|
+| `name` | required, string, max 255 |
+| `position` | required, string, max 255 |
+| `photo` | nullable, file image, max 4MB |
+| `is_active` | opsional, boolean |
+
+Tidak ada field nomor punggung/bendera negara — sesuai keputusan di `petunjuk1.md`
+§7, keduanya menyatu di foto (diedit manual sebelum diupload), bukan kolom database.
+
 ---
 
 ## 4. Format Error Umum
@@ -232,7 +262,7 @@ Backend dan frontend satu repo. Semua path selain `/api/*` (termasuk `/`,
 `/login`, `/admin/apa-pun`) dirender lewat `resources/views/app.blade.php` via
 satu route catch-all di `routes/web.php` — bukan routing Laravel per halaman.
 
-- React Router (di `resources/js/app.tsx`) yang menentukan halaman mana yang
+- React Router (di `resources/js/App.jsx`) yang menentukan halaman mana yang
   muncul, bukan Laravel.
 - Refresh browser di URL apa pun (`/berita/judul-artikel`, `/admin/articles`)
   tetap balikin shell HTML yang sama, lalu React Router yang urus sisanya.
@@ -244,7 +274,4 @@ satu route catch-all di `routes/web.php` — bukan routing Laravel per halaman.
 
 ## 6. Belum Tersedia (jangan diasumsikan ada)
 
-- CRUD Pemain untuk admin (M2)
 - Endpoint kelola akun & role (M2, Master only)
-- Halaman/endpoint Matchday penuh dengan filter kompetisi (data sudah ada di
-  `/api/matches`, tinggal dipakai — lihat §2)

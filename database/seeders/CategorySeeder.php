@@ -10,7 +10,7 @@ class CategorySeeder extends Seeder
 {
     public function run(): void
     {
-        foreach (['Match Report', 'Transfer News', 'Community'] as $name) {
+        foreach (['Match Report', 'Transfer News', 'Club News'] as $name) {
             Category::firstOrCreate(['name' => $name], ['slug' => Str::slug($name)]);
         }
     }
