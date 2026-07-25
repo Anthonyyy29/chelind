@@ -39,12 +39,14 @@ class MatchSyncService
     private function upsert(array $match, int $teamId): void
     {
         $isHome = $match['homeTeam']['id'] === $teamId;
+        $opponentTeam = $isHome ? $match['awayTeam'] : $match['homeTeam'];
 
         GameMatch::updateOrCreate(
             ['external_id' => $match['id']],
             [
                 'competition' => $match['competition']['name'] ?? 'Unknown',
-                'opponent' => $isHome ? $match['awayTeam']['name'] : $match['homeTeam']['name'],
+                'opponent' => $opponentTeam['name'],
+                'opponent_crest' => $opponentTeam['crest'] ?? null,
                 'is_home' => $isHome,
                 'kickoff_at' => $match['utcDate'],
                 'status' => $match['status'] === 'FINISHED' ? 'FINISHED' : 'SCHEDULED',

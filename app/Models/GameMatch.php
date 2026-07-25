@@ -18,6 +18,7 @@ class GameMatch extends Model
         'external_id',
         'competition',
         'opponent',
+        'opponent_crest',
         'is_home',
         'kickoff_at',
         'status',

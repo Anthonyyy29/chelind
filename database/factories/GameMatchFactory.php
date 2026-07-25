@@ -21,6 +21,7 @@ class GameMatchFactory extends Factory
             'external_id' => fake()->unique()->numberBetween(100000, 999999),
             'competition' => 'Premier League',
             'opponent' => fake()->company(),
+            'opponent_crest' => fake()->imageUrl(),
             'is_home' => fake()->boolean(),
             'kickoff_at' => fake()->dateTimeBetween('now', '+2 months'),
             'status' => 'SCHEDULED',

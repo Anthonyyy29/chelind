@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Admin\ArticleController as AdminArticleController;
 use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Api\Admin\SocialLinkController as AdminSocialLinkController;
 use App\Http\Controllers\Api\ArticleController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
@@ -36,6 +37,7 @@ Route::middleware('web')->group(function () {
         Route::prefix('admin')->group(function () {
             Route::apiResource('categories', AdminCategoryController::class)->except('show');
             Route::apiResource('articles', AdminArticleController::class);
+            Route::apiResource('social-links', AdminSocialLinkController::class)->except('show');
         });
     });
 });

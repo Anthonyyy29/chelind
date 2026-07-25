@@ -127,10 +127,15 @@ Default = jadwal (`status=SCHEDULED`, urut kickoff terdekat dulu).
 `?limit=3` → batasi jumlah baris (dipakai buat hero "laga berikutnya").
 
 ```json
-{ "data": [{ "id": 10, "competition": "Premier League", "opponent": "Arsenal",
+{ "data": [{ "id": 10, "competition": "Premier League", "opponent": "Arsenal FC",
+             "opponent_crest": "https://crests.football-data.org/57.png",
              "is_home": true, "kickoff_at": "2026-08-01T14:00:00.000000Z",
              "status": "SCHEDULED", "score_home": null, "score_away": null }] }
 ```
+
+`opponent_crest` adalah URL logo klub lawan, apa adanya dari football-data.org
+(bukan hasil olahan kita). Logo Chelsea sendiri tidak dikirim server — FE cukup
+pakai satu URL tetap karena timnya selalu sama.
 
 > **Catatan:** data ini diisi cron `matches:sync` (jalan tiap 15 menit), bukan
 > input manual. Kalau `FOOTBALL_DATA_API_KEY` di `.env` belum diisi API key
@@ -185,6 +190,27 @@ Catatan:
   FE kirim file lewat `multipart/form-data` di request `PUT`, gunakan trik
   Laravel standar: POST + field `_method=PUT`.
 
+### Social Link — `/api/admin/social-links`
+
+| Method | Path | Body | Sukses |
+|---|---|---|---|
+| GET | `/` | — | `200`, list terurut `sort_order`, tanpa pagination |
+| POST | `/` | lihat di bawah | `201`, `{ "data": {...} }` |
+| PUT/PATCH | `/{id}` | field opsional, `sometimes` | `200`, `{ "data": {...} }` |
+| DELETE | `/{id}` | — | `204` |
+
+**Body create:**
+
+| Field | Aturan |
+|---|---|
+| `platform` | required, string, max 255 |
+| `handle` | required, string, max 255 |
+| `url` | required, URL valid, max 2048 |
+| `description` | nullable, string, max 500 |
+| `sort_order` | opsional, integer ≥ 0 |
+
+Tidak ada field `status`/jumlah member — itu tidak ada di skema tabel `social_links`.
+
 ---
 
 ## 4. Format Error Umum
@@ -218,7 +244,7 @@ satu route catch-all di `routes/web.php` — bukan routing Laravel per halaman.
 
 ## 6. Belum Tersedia (jangan diasumsikan ada)
 
-- CRUD Pemain & Social Link untuk admin (M2)
+- CRUD Pemain untuk admin (M2)
 - Endpoint kelola akun & role (M2, Master only)
 - Halaman/endpoint Matchday penuh dengan filter kompetisi (data sudah ada di
   `/api/matches`, tinggal dipakai — lihat §2)

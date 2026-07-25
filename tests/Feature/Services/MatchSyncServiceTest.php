@@ -13,8 +13,8 @@ test('sync maps a home fixture correctly', function () {
                 'utcDate' => '2026-08-01T14:00:00Z',
                 'status' => 'SCHEDULED',
                 'competition' => ['id' => 2021, 'name' => 'Premier League'],
-                'homeTeam' => ['id' => 61, 'name' => 'Chelsea FC'],
-                'awayTeam' => ['id' => 57, 'name' => 'Arsenal FC'],
+                'homeTeam' => ['id' => 61, 'name' => 'Chelsea FC', 'crest' => 'https://crests.football-data.org/61.png'],
+                'awayTeam' => ['id' => 57, 'name' => 'Arsenal FC', 'crest' => 'https://crests.football-data.org/57.png'],
                 'score' => ['fullTime' => ['home' => null, 'away' => null]],
             ],
         ]]),
@@ -27,6 +27,7 @@ test('sync maps a home fixture correctly', function () {
     $match = GameMatch::firstWhere('external_id', 111);
     expect($match->competition)->toBe('Premier League')
         ->and($match->opponent)->toBe('Arsenal FC')
+        ->and($match->opponent_crest)->toBe('https://crests.football-data.org/57.png')
         ->and($match->is_home)->toBeTrue()
         ->and($match->status)->toBe('SCHEDULED')
         ->and($match->score_home)->toBeNull();
@@ -44,8 +45,8 @@ test('sync maps an away finished fixture correctly', function () {
                 'utcDate' => '2026-07-10T18:30:00Z',
                 'status' => 'FINISHED',
                 'competition' => ['id' => 2021, 'name' => 'Premier League'],
-                'homeTeam' => ['id' => 66, 'name' => 'Manchester United FC'],
-                'awayTeam' => ['id' => 61, 'name' => 'Chelsea FC'],
+                'homeTeam' => ['id' => 66, 'name' => 'Manchester United FC', 'crest' => 'https://crests.football-data.org/66.png'],
+                'awayTeam' => ['id' => 61, 'name' => 'Chelsea FC', 'crest' => 'https://crests.football-data.org/61.png'],
                 'score' => ['fullTime' => ['home' => 1, 'away' => 3]],
             ],
         ]]),
@@ -55,6 +56,7 @@ test('sync maps an away finished fixture correctly', function () {
 
     $match = GameMatch::firstWhere('external_id', 222);
     expect($match->opponent)->toBe('Manchester United FC')
+        ->and($match->opponent_crest)->toBe('https://crests.football-data.org/66.png')
         ->and($match->is_home)->toBeFalse()
         ->and($match->status)->toBe('FINISHED')
         ->and($match->score_home)->toBe(1)
