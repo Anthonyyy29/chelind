@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import WhatsappBanner from '../components/WhatsappBanner';
@@ -13,6 +14,22 @@ export default function NewsPage() {
     const [articles, setArticles] = useState([]);
     const [players, setPlayers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const playersScrollRef = useRef(null);
+
+    const scrollPlayers = (direction) => {
+        if (!playersScrollRef.current) {
+            return;
+        }
+
+        const { scrollLeft, clientWidth } = playersScrollRef.current;
+        const scrollAmount =
+            direction === 'left' ? -clientWidth / 2 : clientWidth / 2;
+
+        playersScrollRef.current.scrollTo({
+            left: scrollLeft + scrollAmount,
+            behavior: 'smooth',
+        });
+    };
 
     useEffect(() => {
         getCategories()
@@ -127,10 +144,31 @@ export default function NewsPage() {
 
                 {players.length > 0 && (
                     <div className="mb-12">
-                        <h2 className="mb-6 text-2xl font-extrabold text-slate-900">
-                            Pemain
-                        </h2>
-                        <div className="flex snap-x snap-mandatory items-stretch gap-5 overflow-x-auto pb-2">
+                        <div className="mb-6 flex items-center justify-between">
+                            <h2 className="text-2xl font-extrabold text-slate-900">
+                                Pemain
+                            </h2>
+                            <div className="hidden items-center gap-2 sm:flex">
+                                <button
+                                    onClick={() => scrollPlayers('left')}
+                                    className="rounded-full bg-white p-2 text-slate-800 shadow transition-colors hover:bg-slate-100"
+                                    title="Scroll Kiri"
+                                >
+                                    <ChevronLeft className="h-5 w-5" />
+                                </button>
+                                <button
+                                    onClick={() => scrollPlayers('right')}
+                                    className="rounded-full bg-white p-2 text-slate-800 shadow transition-colors hover:bg-slate-100"
+                                    title="Scroll Kanan"
+                                >
+                                    <ChevronRight className="h-5 w-5" />
+                                </button>
+                            </div>
+                        </div>
+                        <div
+                            ref={playersScrollRef}
+                            className="flex snap-x snap-mandatory items-stretch gap-5 overflow-x-auto pb-2"
+                        >
                             {players.map((player) => (
                                 <div
                                     key={player.id}
@@ -159,34 +197,68 @@ export default function NewsPage() {
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-                    {rest.map((item) => (
-                        <Link
-                            to={`/berita/${item.slug}`}
-                            key={item.id}
-                            className="group flex cursor-pointer flex-col overflow-hidden rounded-xl border border-slate-300/60 bg-white shadow-sm transition-all duration-300 hover:shadow-xl"
-                        >
-                            <div className="relative aspect-video overflow-hidden">
-                                <img
-                                    src={item.cover_image}
-                                    alt={item.title}
-                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                />
-                            </div>
-                            <div className="flex flex-1 flex-col p-6">
-                                <span className="mb-2 text-[10px] font-extrabold tracking-wider text-blue-600 uppercase">
-                                    {item.category?.name}
-                                </span>
-                                <h3 className="mb-2 text-base leading-snug font-bold text-slate-900 transition-colors group-hover:text-blue-600">
-                                    {item.title}
-                                </h3>
-                                <p className="mt-auto line-clamp-3 text-xs leading-relaxed text-slate-600">
-                                    {item.excerpt}
-                                </p>
-                            </div>
-                        </Link>
-                    ))}
-                </div>
+                {rest.length > 0 && (
+                    <section className="space-y-6">
+                        <div className="flex items-center justify-between border-b border-slate-400/60 pb-4">
+                            <h2 className="text-2xl font-extrabold text-slate-900">
+                                Latest
+                            </h2>
+                            {activeCategory && (
+                                <button
+                                    onClick={() => setSearchParams({})}
+                                    className="flex items-center gap-1 text-xs font-bold tracking-wider text-blue-900 uppercase hover:text-blue-950"
+                                >
+                                    Lihat Semua +
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                            {rest.map((item) => (
+                                <Link
+                                    to={`/berita/${item.slug}`}
+                                    key={item.id}
+                                    className="group flex cursor-pointer flex-col overflow-hidden rounded-xl bg-[#18181b] text-white shadow-lg transition-all duration-300 hover:shadow-2xl"
+                                >
+                                    <div className="relative aspect-video overflow-hidden bg-slate-900">
+                                        <img
+                                            src={item.cover_image}
+                                            alt={item.title}
+                                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                        />
+                                    </div>
+                                    <div className="flex flex-1 flex-col p-6">
+                                        <div className="mb-2 flex items-center gap-2 text-[10px] font-extrabold text-blue-400 uppercase">
+                                            <span className="rounded bg-blue-600 px-2 py-0.5 text-[9px] text-white">
+                                                {item.category?.name}
+                                            </span>
+                                            <span>•</span>
+                                            <span className="text-slate-400">
+                                                {item.published_at &&
+                                                    new Date(
+                                                        item.published_at,
+                                                    ).toLocaleDateString(
+                                                        'id-ID',
+                                                        {
+                                                            day: 'numeric',
+                                                            month: 'short',
+                                                            year: 'numeric',
+                                                        },
+                                                    )}
+                                            </span>
+                                        </div>
+                                        <h3 className="mb-2 text-base leading-snug font-bold transition-colors group-hover:text-blue-400">
+                                            {item.title}
+                                        </h3>
+                                        <p className="mt-auto line-clamp-3 text-xs leading-relaxed text-slate-400">
+                                            {item.excerpt}
+                                        </p>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </section>
+                )}
             </main>
 
             <WhatsappBanner />
