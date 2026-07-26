@@ -108,4 +108,18 @@ export const updatePlayer = (id, formData) => {
 
 export const deletePlayer = (id) => api.delete(`/admin/players/${id}`);
 
+export const getAdminRoles = () =>
+    api.get('/admin/roles').then((res) => res.data.data);
+
+export const getAdminUsers = () =>
+    api.get('/admin/users').then((res) => res.data.data);
+
+export const createUser = (payload) =>
+    api.post('/admin/users', payload).then((res) => res.data.data);
+
+export const updateUser = (id, payload) =>
+    api.put(`/admin/users/${id}`, payload).then((res) => res.data.data);
+
+export const deleteUser = (id) => api.delete(`/admin/users/${id}`);
+
 export default api;

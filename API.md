@@ -156,7 +156,9 @@ Hanya pemain `is_active = true`, urut nama A-Z.
 ## 3. Endpoint Admin (wajib login, prefix `/api/admin`)
 
 Semua butuh cookie session valid (lihat §1). Tidak ada pembedaan role Master vs
-Admin di endpoint ini — dua-duanya boleh kelola artikel & kategori.
+Admin di endpoint ini — dua-duanya boleh kelola artikel & kategori. **Kecuali**
+`/api/admin/users` dan `/api/admin/roles` (§3f) yang khusus Master — role
+Admin biasa akan kena `403` di situ.
 
 ### Kategori — `/api/admin/categories`
 
@@ -241,6 +243,42 @@ Tidak ada field `status`/jumlah member — itu tidak ada di skema tabel `social_
 Tidak ada field nomor punggung/bendera negara — sesuai keputusan di `petunjuk1.md`
 §7, keduanya menyatu di foto (diedit manual sebelum diupload), bukan kolom database.
 
+### Kelola Akun & Role — `/api/admin/users`, `/api/admin/roles` (Master saja)
+
+Semua route di bawah ini butuh role `master`. Kalau yang login role `admin`,
+balikannya `403` + `{ "message": "Hanya Master yang boleh mengakses ini." }`.
+
+| Method | Path | Body | Sukses |
+|---|---|---|---|
+| GET | `/roles` | — | `200`, `{ "data": [{ "id": 1, "name": "master" }, ...] }` |
+| GET | `/users` | — | `200`, semua akun, urut nama, tanpa pagination |
+| POST | `/users` | lihat di bawah | `201`, `{ "data": {...} }` |
+| PUT/PATCH | `/users/{id}` | field opsional, `sometimes` | `200`, `{ "data": {...} }` |
+| DELETE | `/users/{id}` | — | `204` |
+
+**Body create:**
+
+| Field | Aturan |
+|---|---|
+| `name` | required, string, max 255 |
+| `email` | required, email, unik |
+| `password` | required, min 8 karakter (disimpan hashed) |
+| `role_id` | required, harus ada di tabel `roles` |
+
+Update pakai aturan sama tapi `sometimes`, dan `password` boleh dikosongkan
+(artinya tidak ganti password). Hapus akun sendiri (yang lagi login) selalu
+ditolak `422` — Master tidak bisa menghapus akunnya sendiri lewat sini.
+
+Response `data` bentuknya:
+
+```json
+{ "id": 2, "name": "Admin Chelind", "email": "admin@chelind.test",
+  "role": { "id": 2, "name": "admin" }, "created_at": "..." }
+```
+
+Tidak ada flow lupa password lewat email (lihat `petunjuk1.md` §7) — kalau
+Master lupa password sendiri, mitigasinya tetap command Artisan langsung ke DB.
+
 ---
 
 ## 4. Format Error Umum
@@ -248,6 +286,7 @@ Tidak ada field nomor punggung/bendera negara — sesuai keputusan di `petunjuk1
 | Status | Kapan | Bentuk |
 |---|---|---|
 | `401` | Belum login / session habis | `{ "message": "Unauthenticated." }` |
+| `403` | Login sebagai Admin tapi akses endpoint khusus Master | `{ "message": "Hanya Master yang boleh mengakses ini." }` |
 | `422` | Validasi gagal | `{ "message": "...", "errors": { "field": ["pesan"] } }` |
 | `422` | Hapus kategori yang masih dipakai artikel | `{ "message": "Kategori masih dipakai artikel, tidak bisa dihapus." }` |
 | `404` | Artikel/kategori tidak ditemukan, atau artikel belum published | `{ "message": "Not Found" / "..." }` |
@@ -274,4 +313,6 @@ satu route catch-all di `routes/web.php` — bukan routing Laravel per halaman.
 
 ## 6. Belum Tersedia (jangan diasumsikan ada)
 
-- Endpoint kelola akun & role (M2, Master only)
+Semua endpoint yang direncanakan M1 & M2 di `plan.md` sudah ada. Yang masih
+kurang bukan soal API, tapi deploy ke server publik (§9/§14 di `plan.md`) dan
+pengisian konten asli — di luar lingkup dokumen ini.

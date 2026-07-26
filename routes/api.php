@@ -3,7 +3,9 @@
 use App\Http\Controllers\Api\Admin\ArticleController as AdminArticleController;
 use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Api\Admin\PlayerController as AdminPlayerController;
+use App\Http\Controllers\Api\Admin\RoleController as AdminRoleController;
 use App\Http\Controllers\Api\Admin\SocialLinkController as AdminSocialLinkController;
+use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\ArticleController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
@@ -42,6 +44,12 @@ Route::middleware('web')->group(function () {
             Route::apiResource('articles', AdminArticleController::class);
             Route::apiResource('social-links', AdminSocialLinkController::class)->except('show');
             Route::apiResource('players', AdminPlayerController::class)->except('show');
+
+            // Master saja — kelola akun & role (petunjuk1.md §4b).
+            Route::middleware('master')->group(function () {
+                Route::get('roles', [AdminRoleController::class, 'index']);
+                Route::apiResource('users', AdminUserController::class)->except('show');
+            });
         });
     });
 });

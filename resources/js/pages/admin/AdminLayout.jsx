@@ -12,6 +12,7 @@ import {
     Trophy,
     Users,
     Share2,
+    ShieldCheck,
     LogOut,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -23,6 +24,12 @@ const NAV_ITEMS = [
     { to: '/admin/pemain', label: 'Manajemen Pemain', icon: Users },
     { to: '/admin/social-link', label: 'Tautan Komunitas', icon: Share2 },
 ];
+
+const MASTER_NAV_ITEM = {
+    to: '/admin/akun',
+    label: 'Setelan Role',
+    icon: ShieldCheck,
+};
 
 const PAGE_META = {
     '/admin/dashboard': {
@@ -44,6 +51,10 @@ const PAGE_META = {
     '/admin/social-link': {
         title: 'Tautan Komunitas',
         subtitle: 'Kelola semua platform dan link komunitas Chelind',
+    },
+    '/admin/akun': {
+        title: 'Setelan Role Admin',
+        subtitle: 'Kelola akun dan hak akses admin',
     },
 };
 
@@ -84,6 +95,12 @@ export default function AdminLayout() {
     const meta = resolvePageMeta(location.pathname);
     const isMaster = user.role?.name === 'master';
 
+    if (location.pathname.startsWith('/admin/akun') && !isMaster) {
+        return <Navigate to="/admin/dashboard" replace />;
+    }
+
+    const navItems = isMaster ? [...NAV_ITEMS, MASTER_NAV_ITEM] : NAV_ITEMS;
+
     return (
         <div className="flex min-h-screen flex-col bg-[#090d16] font-poppins text-slate-100 selection:bg-blue-600 selection:text-white md:flex-row">
             <aside className="flex w-full shrink-0 flex-col justify-between border-slate-800/60 bg-[#0e1422] p-6 md:h-screen md:w-64 md:border-r">
@@ -102,7 +119,7 @@ export default function AdminLayout() {
                     </span>
 
                     <nav className="space-y-1">
-                        {NAV_ITEMS.map((item) => {
+                        {navItems.map((item) => {
                             const Icon = item.icon;
                             const active = location.pathname.startsWith(
                                 item.to,

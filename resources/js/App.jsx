@@ -15,6 +15,7 @@ import ArticleEditorPage from './pages/admin/ArticleEditorPage';
 import MatchAdminPage from './pages/admin/MatchAdminPage';
 import PlayerAdminPage from './pages/admin/PlayerAdminPage';
 import SocialLinkAdminPage from './pages/admin/SocialLinkAdminPage';
+import AccountAdminPage from './pages/admin/AccountAdminPage';
 
 function AdminEntry() {
     const { user, checking } = useAuth();
@@ -79,6 +80,7 @@ export default function App() {
                                 path="social-link"
                                 element={<SocialLinkAdminPage />}
                             />
+                            <Route path="akun" element={<AccountAdminPage />} />
                         </Route>
                     </Route>
                 </Routes>
