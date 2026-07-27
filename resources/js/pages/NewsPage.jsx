@@ -14,6 +14,9 @@ export default function NewsPage() {
     const [articles, setArticles] = useState([]);
     const [players, setPlayers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
     const playersScrollRef = useRef(null);
 
     const scrollPlayers = (direction) => {
@@ -45,10 +48,34 @@ export default function NewsPage() {
         const params = activeCategory ? { category: activeCategory } : {};
 
         getArticles(params)
-            .then((res) => setArticles(res.data || []))
-            .catch(() => setArticles([]))
+            .then((res) => {
+                setArticles(res.data || []);
+                setPage(1);
+                setHasMore((res.meta?.last_page || 1) > 1);
+            })
+            .catch(() => {
+                setArticles([]);
+                setHasMore(false);
+            })
             .finally(() => setLoading(false));
     }, [activeCategory]);
+
+    const loadMore = () => {
+        const nextPage = page + 1;
+        const params = activeCategory
+            ? { category: activeCategory, page: nextPage }
+            : { page: nextPage };
+
+        setLoadingMore(true);
+
+        getArticles(params)
+            .then((res) => {
+                setArticles((prev) => [...prev, ...(res.data || [])]);
+                setPage(nextPage);
+                setHasMore(nextPage < (res.meta?.last_page || nextPage));
+            })
+            .finally(() => setLoadingMore(false));
+    };
 
     const activeCategoryName = categories.find(
         (c) => c.slug === activeCategory,
@@ -257,6 +284,20 @@ export default function NewsPage() {
                                 </Link>
                             ))}
                         </div>
+
+                        {hasMore && (
+                            <div className="flex justify-center pt-4">
+                                <button
+                                    onClick={loadMore}
+                                    disabled={loadingMore}
+                                    className="rounded-full border border-slate-400 bg-white px-6 py-2.5 text-xs font-bold tracking-wider text-slate-700 uppercase shadow-sm transition-all hover:border-slate-800 disabled:opacity-60"
+                                >
+                                    {loadingMore
+                                        ? 'Memuat...'
+                                        : 'Muat Lebih Banyak'}
+                                </button>
+                            </div>
+                        )}
                     </section>
                 )}
             </main>
