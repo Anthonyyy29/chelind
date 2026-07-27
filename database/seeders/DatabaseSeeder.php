@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -15,11 +16,22 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            RoleSeeder::class,
+            CategorySeeder::class,
+            PlayerSeeder::class,
+            SocialLinkSeeder::class,
         ]);
+
+        $masterRole = Role::where('name', 'master')->first();
+
+        User::firstOrCreate(
+            ['email' => 'owner@chelind.test'],
+            [
+                'name' => 'Owner Chelind',
+                'password' => 'password',
+                'role_id' => $masterRole->id,
+            ]
+        );
     }
 }

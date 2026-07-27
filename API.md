@@ -127,22 +127,38 @@ Default = jadwal (`status=SCHEDULED`, urut kickoff terdekat dulu).
 `?limit=3` → batasi jumlah baris (dipakai buat hero "laga berikutnya").
 
 ```json
-{ "data": [{ "id": 10, "competition": "Premier League", "opponent": "Arsenal",
+{ "data": [{ "id": 10, "competition": "Premier League", "opponent": "Arsenal FC",
+             "opponent_crest": "https://crests.football-data.org/57.png",
              "is_home": true, "kickoff_at": "2026-08-01T14:00:00.000000Z",
              "status": "SCHEDULED", "score_home": null, "score_away": null }] }
 ```
+
+`opponent_crest` adalah URL logo klub lawan, apa adanya dari football-data.org
+(bukan hasil olahan kita). Logo Chelsea sendiri tidak dikirim server — FE cukup
+pakai satu URL tetap karena timnya selalu sama.
 
 > **Catatan:** data ini diisi cron `matches:sync` (jalan tiap 15 menit), bukan
 > input manual. Kalau `FOOTBALL_DATA_API_KEY` di `.env` belum diisi API key
 > asli, endpoint ini akan selalu balikin `data: []` — bukan berarti endpointnya
 > rusak.
 
+### `GET /api/players`
+
+Hanya pemain `is_active = true`, urut nama A-Z.
+
+```json
+{ "data": [{ "id": 1, "name": "Cole Palmer", "position": "Attacking Midfielder",
+             "photo": "https://.../storage/players/xxx.jpg", "is_active": true }] }
+```
+
 ---
 
 ## 3. Endpoint Admin (wajib login, prefix `/api/admin`)
 
 Semua butuh cookie session valid (lihat §1). Tidak ada pembedaan role Master vs
-Admin di endpoint ini — dua-duanya boleh kelola artikel & kategori.
+Admin di endpoint ini — dua-duanya boleh kelola artikel & kategori. **Kecuali**
+`/api/admin/users` dan `/api/admin/roles` (§3f) yang khusus Master — role
+Admin biasa akan kena `403` di situ.
 
 ### Kategori — `/api/admin/categories`
 
@@ -185,6 +201,84 @@ Catatan:
   FE kirim file lewat `multipart/form-data` di request `PUT`, gunakan trik
   Laravel standar: POST + field `_method=PUT`.
 
+### Social Link — `/api/admin/social-links`
+
+| Method | Path | Body | Sukses |
+|---|---|---|---|
+| GET | `/` | — | `200`, list terurut `sort_order`, tanpa pagination |
+| POST | `/` | lihat di bawah | `201`, `{ "data": {...} }` |
+| PUT/PATCH | `/{id}` | field opsional, `sometimes` | `200`, `{ "data": {...} }` |
+| DELETE | `/{id}` | — | `204` |
+
+**Body create:**
+
+| Field | Aturan |
+|---|---|
+| `platform` | required, string, max 255 |
+| `handle` | required, string, max 255 |
+| `url` | required, URL valid, max 2048 |
+| `description` | nullable, string, max 500 |
+| `sort_order` | opsional, integer ≥ 0 |
+
+Tidak ada field `status`/jumlah member — itu tidak ada di skema tabel `social_links`.
+
+### Pemain — `/api/admin/players`
+
+| Method | Path | Body | Sukses |
+|---|---|---|---|
+| GET | `/` | — | `200`, semua pemain (termasuk nonaktif), urut nama, tanpa pagination |
+| POST | `/` | `multipart/form-data`, lihat di bawah | `201`, `{ "data": {...} }` |
+| PUT/PATCH | `/{id}` | field opsional, `sometimes` | `200`, `{ "data": {...} }` |
+| DELETE | `/{id}` | — | `204`. Foto ikut terhapus dari storage |
+
+**Body create:**
+
+| Field | Aturan |
+|---|---|
+| `name` | required, string, max 255 |
+| `position` | required, string, max 255 |
+| `photo` | nullable, file image, max 4MB |
+| `is_active` | opsional, boolean |
+
+Tidak ada field nomor punggung/bendera negara — sesuai keputusan di `petunjuk1.md`
+§7, keduanya menyatu di foto (diedit manual sebelum diupload), bukan kolom database.
+
+### Kelola Akun & Role — `/api/admin/users`, `/api/admin/roles` (Master saja)
+
+Semua route di bawah ini butuh role `master`. Kalau yang login role `admin`,
+balikannya `403` + `{ "message": "Hanya Master yang boleh mengakses ini." }`.
+
+| Method | Path | Body | Sukses |
+|---|---|---|---|
+| GET | `/roles` | — | `200`, `{ "data": [{ "id": 1, "name": "master" }, ...] }` |
+| GET | `/users` | — | `200`, semua akun, urut nama, tanpa pagination |
+| POST | `/users` | lihat di bawah | `201`, `{ "data": {...} }` |
+| PUT/PATCH | `/users/{id}` | field opsional, `sometimes` | `200`, `{ "data": {...} }` |
+| DELETE | `/users/{id}` | — | `204` |
+
+**Body create:**
+
+| Field | Aturan |
+|---|---|
+| `name` | required, string, max 255 |
+| `email` | required, email, unik |
+| `password` | required, min 8 karakter (disimpan hashed) |
+| `role_id` | required, harus ada di tabel `roles` |
+
+Update pakai aturan sama tapi `sometimes`, dan `password` boleh dikosongkan
+(artinya tidak ganti password). Hapus akun sendiri (yang lagi login) selalu
+ditolak `422` — Master tidak bisa menghapus akunnya sendiri lewat sini.
+
+Response `data` bentuknya:
+
+```json
+{ "id": 2, "name": "Admin Chelind", "email": "admin@chelind.test",
+  "role": { "id": 2, "name": "admin" }, "created_at": "..." }
+```
+
+Tidak ada flow lupa password lewat email (lihat `petunjuk1.md` §7) — kalau
+Master lupa password sendiri, mitigasinya tetap command Artisan langsung ke DB.
+
 ---
 
 ## 4. Format Error Umum
@@ -192,6 +286,7 @@ Catatan:
 | Status | Kapan | Bentuk |
 |---|---|---|
 | `401` | Belum login / session habis | `{ "message": "Unauthenticated." }` |
+| `403` | Login sebagai Admin tapi akses endpoint khusus Master | `{ "message": "Hanya Master yang boleh mengakses ini." }` |
 | `422` | Validasi gagal | `{ "message": "...", "errors": { "field": ["pesan"] } }` |
 | `422` | Hapus kategori yang masih dipakai artikel | `{ "message": "Kategori masih dipakai artikel, tidak bisa dihapus." }` |
 | `404` | Artikel/kategori tidak ditemukan, atau artikel belum published | `{ "message": "Not Found" / "..." }` |
@@ -206,7 +301,7 @@ Backend dan frontend satu repo. Semua path selain `/api/*` (termasuk `/`,
 `/login`, `/admin/apa-pun`) dirender lewat `resources/views/app.blade.php` via
 satu route catch-all di `routes/web.php` — bukan routing Laravel per halaman.
 
-- React Router (di `resources/js/app.tsx`) yang menentukan halaman mana yang
+- React Router (di `resources/js/App.jsx`) yang menentukan halaman mana yang
   muncul, bukan Laravel.
 - Refresh browser di URL apa pun (`/berita/judul-artikel`, `/admin/articles`)
   tetap balikin shell HTML yang sama, lalu React Router yang urus sisanya.
@@ -218,7 +313,6 @@ satu route catch-all di `routes/web.php` — bukan routing Laravel per halaman.
 
 ## 6. Belum Tersedia (jangan diasumsikan ada)
 
-- CRUD Pemain & Social Link untuk admin (M2)
-- Endpoint kelola akun & role (M2, Master only)
-- Halaman/endpoint Matchday penuh dengan filter kompetisi (data sudah ada di
-  `/api/matches`, tinggal dipakai — lihat §2)
+Semua endpoint yang direncanakan M1 & M2 di `plan.md` sudah ada. Yang masih
+kurang bukan soal API, tapi deploy ke server publik (§9/§14 di `plan.md`) dan
+pengisian konten asli — di luar lingkup dokumen ini.

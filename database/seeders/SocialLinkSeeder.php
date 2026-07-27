@@ -44,14 +44,14 @@ class SocialLinkSeeder extends Seeder
             [
                 'platform' => 'Whatsapp',
                 'handle' => 'Community',
-                'url' => '', // belum ada link — dikosongkan dulu
+                'url' => 'https://chat.whatsapp.com/LqpgBD74aQVDd3tICsvCoG',
                 'description' => 'Bergabung dengan ribuan fans Chelsea di grup komunitas WhatsApp kami.',
                 'sort_order' => 5,
             ],
         ];
 
         foreach ($socialLinks as $link) {
-            SocialLink::create($link);
+            SocialLink::firstOrCreate(['platform' => $link['platform']], $link);
         }
     }
 }

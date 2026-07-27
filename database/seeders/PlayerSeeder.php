@@ -14,15 +14,15 @@ class PlayerSeeder extends Seeder
     public function run(): void
     {
         $players = [
-            ['name' => 'Filip Jorgensen', 'position' => 'Goalkeeper',           'photo' => 'players/filip-jorgensen.png'],
-            ['name' => 'Cole Palmer',     'position' => 'Attacking Midfielder', 'photo' => 'players/cole-palmer.png'],
-            ['name' => 'Joao Pedro',      'position' => 'Forward',              'photo' => 'players/joao-pedro.png'],
-            ['name' => 'Enzo Fernandez',  'position' => 'Central Midfielder',   'photo' => 'players/enzo-fernandez.png'],
-            ['name' => 'Liam Delap',      'position' => 'Striker',              'photo' => 'players/liam-delap.png'],
+            ['name' => 'Filip Jorgensen', 'position' => 'Goalkeeper', 'photo' => 'players/filip-jorgensen.png'],
+            ['name' => 'Cole Palmer', 'position' => 'Attacking Midfielder', 'photo' => 'players/cole-palmer.png'],
+            ['name' => 'Joao Pedro', 'position' => 'Forward', 'photo' => 'players/joao-pedro.png'],
+            ['name' => 'Enzo Fernandez', 'position' => 'Central Midfielder', 'photo' => 'players/enzo-fernandez.png'],
+            ['name' => 'Liam Delap', 'position' => 'Striker', 'photo' => 'players/liam-delap.png'],
         ];
 
         foreach ($players as $player) {
-            Player::create($player + ['is_active' => true]);
+            Player::firstOrCreate(['name' => $player['name']], $player + ['is_active' => true]);
         }
     }
 }

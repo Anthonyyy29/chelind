@@ -20,6 +20,7 @@ class GameMatchResource extends JsonResource
             'id' => $match->id,
             'competition' => $match->competition,
             'opponent' => $match->opponent,
+            'opponent_crest' => $match->opponent_crest,
             'is_home' => $match->is_home,
             'kickoff_at' => $match->kickoff_at,
             'status' => $match->status,
