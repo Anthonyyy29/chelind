@@ -15,6 +15,7 @@ import MatchesPage from './pages/MatchesPage';
 import NewsPage from './pages/NewsPage';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLoginPage from './pages/AdminLoginPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import { DataProvider } from './context/DataContext';
 
 function AppContent() {
@@ -42,6 +43,8 @@ function AppContent() {
         setRoute('category-transfer');
       } else if (hash === '#matches-page') {
         setRoute('matches-page');
+      } else if (hash === '#privacy-policy') {
+        setRoute('privacy-policy');
       } else if (hash === '#admin') {
         setRoute('admin');
       } else {
@@ -119,6 +122,10 @@ function AppContent() {
 
   if (route === 'matches-page') {
     return <MatchesPage onNavigateBack={navigateHome} />;
+  }
+
+  if (route === 'privacy-policy') {
+    return <PrivacyPolicyPage onNavigateBack={navigateHome} />;
   }
 
   // Complete Landing Page matching user's full-page screenshot 100%
