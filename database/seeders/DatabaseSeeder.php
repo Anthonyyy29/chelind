@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $masterRole = Role::where('name', 'master')->first();
+        $adminRole = Role::where('name', 'admin')->first();
 
         User::firstOrCreate(
             ['email' => 'owner@chelind.test'],
@@ -33,5 +34,16 @@ class DatabaseSeeder extends Seeder
                 'role_id' => $masterRole->id,
             ]
         );
+
+        User::firstOrCreate(
+            ['email' => 'admin@chelind.test'],
+            [
+                'name' => 'Admin Chelind',
+                'password' => 'password',
+                'role_id' => $adminRole->id,
+            ]
+        );
+
+        $this->call(ArticleSeeder::class);
     }
 }
