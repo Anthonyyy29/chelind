@@ -1,0 +1,83 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: docker/php/Dockerfile
+        restart: unless-stopped
+        env_file: .env
+        volumes:
+            - public-data:/var/www/html/public
+            - storage-data:/var/www/html/storage/app/public
+        depends_on:
+            - mysql
+        networks:
+            - chelind
+
+    # Jalanin scheduler Laravel (sync jadwal pertandingan tiap 15 menit) —
+    # image sama kayak "app", cuma command-nya beda, jadi tidak perlu build ulang.
+    scheduler:
+        build:
+            context: .
+            dockerfile: docker/php/Dockerfile
+        restart: unless-stopped
+        env_file: .env
+        entrypoint: [""]
+        command: >
+            sh -c "while true; do php artisan schedule:run --no-interaction; sleep 60; done"
+        depends_on:
+            - app
+        networks:
+            - chelind
+
+    nginx:
+        image: nginx:1.27-alpine
+        restart: unless-stopped
+        environment:
+            - DOMAIN=${DOMAIN}
+        ports:
+            - '80:80'
+            - '443:443'
+        volumes:
+            - ./docker/nginx/templates:/etc/nginx/templates:ro
+            - public-data:/var/www/html/public:ro
+            - storage-data:/var/www/html/storage/app/public:ro
+            - ./docker/certbot/conf:/etc/letsencrypt:ro
+            - ./docker/certbot/www:/var/www/certbot:ro
+        depends_on:
+            - app
+        networks:
+            - chelind
+
+    certbot:
+        image: certbot/certbot
+        volumes:
+            - ./docker/certbot/conf:/etc/letsencrypt
+            - ./docker/certbot/www:/var/www/certbot
+        networks:
+            - chelind
+
+    mysql:
+        image: mysql:8.4
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: '${DB_DATABASE}'
+            MYSQL_USER: '${DB_USERNAME}'
+            MYSQL_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+        volumes:
+            - mysql-data:/var/lib/mysql
+        networks:
+            - chelind
+
+networks:
+    chelind:
+        driver: bridge
+
+volumes:
+    mysql-data:
+    # Isinya di-refresh entrypoint.sh tiap "app" start, jadi aman kalau
+    # kosong/basi — bukan tempat penyimpanan data permanen.
+    public-data:
+    # Ini beneran nyimpen file upload (cover artikel, foto pemain/transfer)
+    # — TIDAK di-refresh, harus persist antar deploy.
+    storage-data:

@@ -15,6 +15,7 @@
 .env
 .env.backup
 .env.production
+/docker/certbot
 .phpactor.json
 .phpunit.result.cache
 Homestead.json
