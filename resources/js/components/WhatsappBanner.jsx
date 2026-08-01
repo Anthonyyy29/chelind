@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { WHATSAPP_COMMUNITY_URL } from '../lib/whatsapp';
 
 export default function WhatsappBanner() {
     return (
@@ -17,12 +17,14 @@ export default function WhatsappBanner() {
                 <p className="mb-8 text-lg font-bold text-white drop-shadow-md sm:text-2xl">
                     Join our WhatsApp Community now!
                 </p>
-                <Link
-                    to="/komunitas"
+                <a
+                    href={WHATSAPP_COMMUNITY_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="transform rounded-full bg-[#001f66] px-9 py-3.5 text-xs font-extrabold tracking-wider text-white uppercase shadow-2xl transition-all duration-300 hover:scale-105 hover:bg-[#002db3] hover:shadow-blue-500/40 active:scale-95 sm:text-sm"
                 >
                     Join Our Community
-                </Link>
+                </a>
             </div>
         </section>
     );

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { WHATSAPP_COMMUNITY_URL } from '../lib/whatsapp';
 
 const NAV_LINKS = [
     { to: '/berita', label: 'News' },
@@ -47,12 +48,14 @@ export default function Navbar() {
                 </nav>
 
                 <div className="hidden items-center gap-3 md:flex">
-                    <Link
-                        to="/komunitas"
+                    <a
+                        href={WHATSAPP_COMMUNITY_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="rounded-full bg-[#001f66] px-5 py-2.5 text-xs font-bold tracking-wider text-white uppercase shadow-lg transition-all duration-200 hover:bg-[#002db3] hover:shadow-blue-500/25 active:scale-95"
                     >
                         Join Our Community
-                    </Link>
+                    </a>
                 </div>
 
                 <button
@@ -97,13 +100,15 @@ export default function Navbar() {
                             {link.label}
                         </Link>
                     ))}
-                    <Link
-                        to="/komunitas"
+                    <a
+                        href={WHATSAPP_COMMUNITY_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         onClick={() => setIsMobileOpen(false)}
                         className="block w-full rounded-full bg-[#001f66] px-5 py-3 text-center text-xs font-bold tracking-wider text-white uppercase shadow-lg"
                     >
                         Join Our Community
-                    </Link>
+                    </a>
                 </div>
             )}
         </header>

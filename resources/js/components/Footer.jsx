@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { WHATSAPP_COMMUNITY_URL } from '../lib/whatsapp';
 
 export default function Footer() {
     return (
@@ -32,12 +33,14 @@ export default function Footer() {
                         >
                             Matchday
                         </Link>
-                        <Link
-                            to="/komunitas"
+                        <a
+                            href={WHATSAPP_COMMUNITY_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="transition-colors hover:text-white"
                         >
                             Community
-                        </Link>
+                        </a>
                     </div>
                 </div>
 

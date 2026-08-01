@@ -7,7 +7,6 @@ import NewsPage from './pages/NewsPage';
 import ArticleDetailPage from './pages/ArticleDetailPage';
 import MatchdayPage from './pages/MatchdayPage';
 import TransferPage from './pages/TransferPage';
-import KomunitasPage from './pages/KomunitasPage';
 import AdminLoginPage from './pages/admin/AdminLoginPage';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboardHome from './pages/admin/AdminDashboardHome';
@@ -50,7 +49,6 @@ export default function App() {
                     />
                     <Route path="/matchday" element={<MatchdayPage />} />
                     <Route path="/transfer" element={<TransferPage />} />
-                    <Route path="/komunitas" element={<KomunitasPage />} />
 
                     <Route path="/admin">
                         <Route index element={<AdminEntry />} />
