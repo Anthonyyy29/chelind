@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const NAV_LINKS = [
     { to: '/berita', label: 'News' },
-    { to: '/berita?kategori=transfer-news', label: 'Transfer News' },
+    { to: '/transfer', label: 'Transfer Rumour' },
     { to: '/matchday', label: 'Matchday' },
 ];
 

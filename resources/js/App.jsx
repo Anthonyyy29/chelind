@@ -6,6 +6,7 @@ import HomePage from './pages/HomePage';
 import NewsPage from './pages/NewsPage';
 import ArticleDetailPage from './pages/ArticleDetailPage';
 import MatchdayPage from './pages/MatchdayPage';
+import TransferPage from './pages/TransferPage';
 import KomunitasPage from './pages/KomunitasPage';
 import AdminLoginPage from './pages/admin/AdminLoginPage';
 import AdminLayout from './pages/admin/AdminLayout';
@@ -13,6 +14,7 @@ import AdminDashboardHome from './pages/admin/AdminDashboardHome';
 import ArticleListPage from './pages/admin/ArticleListPage';
 import ArticleEditorPage from './pages/admin/ArticleEditorPage';
 import MatchAdminPage from './pages/admin/MatchAdminPage';
+import TransferAdminPage from './pages/admin/TransferAdminPage';
 import PlayerAdminPage from './pages/admin/PlayerAdminPage';
 import SocialLinkAdminPage from './pages/admin/SocialLinkAdminPage';
 import AccountAdminPage from './pages/admin/AccountAdminPage';
@@ -47,6 +49,7 @@ export default function App() {
                         element={<ArticleDetailPage />}
                     />
                     <Route path="/matchday" element={<MatchdayPage />} />
+                    <Route path="/transfer" element={<TransferPage />} />
                     <Route path="/komunitas" element={<KomunitasPage />} />
 
                     <Route path="/admin">
@@ -71,6 +74,10 @@ export default function App() {
                             <Route
                                 path="pertandingan"
                                 element={<MatchAdminPage />}
+                            />
+                            <Route
+                                path="transfer"
+                                element={<TransferAdminPage />}
                             />
                             <Route
                                 path="pemain"

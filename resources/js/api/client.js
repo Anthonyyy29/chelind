@@ -37,6 +37,9 @@ export const getMatches = (params = {}) =>
 export const getPlayers = () =>
     api.get('/players').then((res) => res.data.data);
 
+export const getTransfers = () =>
+    api.get('/transfers').then((res) => res.data.data);
+
 // --- Admin ---
 
 export const getAdminCategories = () =>
@@ -107,6 +110,28 @@ export const updatePlayer = (id, formData) => {
 };
 
 export const deletePlayer = (id) => api.delete(`/admin/players/${id}`);
+
+export const getAdminTransfers = () =>
+    api.get('/admin/transfers').then((res) => res.data.data);
+
+export const createTransfer = (formData) =>
+    api
+        .post('/admin/transfers', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        })
+        .then((res) => res.data.data);
+
+export const updateTransfer = (id, formData) => {
+    formData.append('_method', 'PUT');
+
+    return api
+        .post(`/admin/transfers/${id}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        })
+        .then((res) => res.data.data);
+};
+
+export const deleteTransfer = (id) => api.delete(`/admin/transfers/${id}`);
 
 export const getAdminRoles = () =>
     api.get('/admin/roles').then((res) => res.data.data);

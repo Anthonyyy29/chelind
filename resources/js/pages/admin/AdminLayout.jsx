@@ -10,6 +10,7 @@ import {
     LayoutDashboard,
     FileText,
     Trophy,
+    ArrowLeftRight,
     Users,
     Share2,
     ShieldCheck,
@@ -21,6 +22,7 @@ const NAV_ITEMS = [
     { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/admin/artikel', label: 'Manajemen Berita', icon: FileText },
     { to: '/admin/pertandingan', label: 'Pusat Pertandingan', icon: Trophy },
+    { to: '/admin/transfer', label: 'Pusat Transfer', icon: ArrowLeftRight },
     { to: '/admin/pemain', label: 'Manajemen Pemain', icon: Users },
     { to: '/admin/social-link', label: 'Tautan Komunitas', icon: Share2 },
 ];
@@ -43,6 +45,10 @@ const PAGE_META = {
     '/admin/pertandingan': {
         title: 'Pusat Pertandingan',
         subtitle: 'Jadwal & hasil pertandingan Chelsea (disinkron otomatis)',
+    },
+    '/admin/transfer': {
+        title: 'Pusat Transfer',
+        subtitle: 'Kelola data transfer masuk, keluar, dan peminjaman pemain',
     },
     '/admin/pemain': {
         title: 'Manajemen Pemain',
