@@ -56,7 +56,7 @@ test('admin listing includes drafts', function () {
     $response->assertOk()->assertJsonCount(2, 'data');
 });
 
-test('authenticated user can create an article with sanitized body, auto slug, and cover image', function () {
+test('authenticated user can create an article with auto slug and cover image', function () {
     Storage::fake('public');
 
     $category = Category::factory()->create();
@@ -64,7 +64,7 @@ test('authenticated user can create an article with sanitized body, auto slug, a
 
     $response = $this->actingAs($user)->postJson('/api/admin/articles', [
         'title' => 'Chelsea Menang Besar',
-        'body' => '<p>Isi berita</p><script>alert(1)</script>',
+        'body' => "Isi berita paragraf pertama.\n\nParagraf kedua.",
         'category_id' => $category->id,
         'status' => 'published',
         'cover_image' => UploadedFile::fake()->image('cover.jpg'),
@@ -76,12 +76,56 @@ test('authenticated user can create an article with sanitized body, auto slug, a
 
     $article = Article::firstWhere('slug', 'chelsea-menang-besar');
 
-    expect($article->body)->not->toContain('<script')
-        ->and($article->author_id)->toBe($user->id)
+    expect($article->author_id)->toBe($user->id)
         ->and($article->published_at)->not->toBeNull()
         ->and($article->cover_image)->not->toBeNull();
 
     Storage::disk('public')->assertExists($article->cover_image);
+});
+
+test('authenticated user can create an article with tags, quote, and match stats', function () {
+    $category = Category::factory()->create();
+    $user = User::factory()->create();
+
+    $matchStats = [
+        'home_team' => 'Chelsea FC',
+        'away_team' => 'Tottenham Hotspur',
+        'home_score' => '2',
+        'away_score' => '1',
+        'possession_home' => 58,
+        'possession_away' => 42,
+        'shots_home' => 7,
+        'shots_away' => 4,
+        'pass_home' => 91,
+        'pass_away' => 84,
+        'corners_home' => 6,
+        'corners_away' => 3,
+        'goalscorers_text' => "Son Heung-min 34' (Spurs)\nCole Palmer 58', 79' (Chelsea)",
+    ];
+
+    $response = $this->actingAs($user)->postJson('/api/admin/articles', [
+        'title' => 'Derby London Dimenangkan Chelsea',
+        'body' => 'Isi berita match report.',
+        'category_id' => $category->id,
+        'status' => 'published',
+        'tags' => json_encode(['Chelsea', 'Premier League', 'Derby']),
+        'quote_text' => 'Kemenangan ini penting untuk moral tim.',
+        'quote_author' => 'ENZO MARESCA',
+        'match_stats' => json_encode($matchStats),
+    ]);
+
+    $response->assertCreated()
+        ->assertJsonPath('data.tags', ['Chelsea', 'Premier League', 'Derby'])
+        ->assertJsonPath('data.quote.text', 'Kemenangan ini penting untuk moral tim.')
+        ->assertJsonPath('data.quote.author', 'ENZO MARESCA')
+        ->assertJsonPath('data.match_stats.home_team', 'Chelsea FC')
+        ->assertJsonPath('data.match_stats.possession_home', 58);
+
+    $article = Article::firstWhere('slug', 'derby-london-dimenangkan-chelsea');
+
+    expect($article->tags)->toBe(['Chelsea', 'Premier League', 'Derby'])
+        ->and($article->quote_text)->toBe('Kemenangan ini penting untuk moral tim.')
+        ->and($article->match_stats['away_team'])->toBe('Tottenham Hotspur');
 });
 
 test('authenticated user can update an article', function () {

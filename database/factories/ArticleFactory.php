@@ -25,7 +25,7 @@ class ArticleFactory extends Factory
             'title' => $title,
             'slug' => str($title)->slug(),
             'excerpt' => fake()->sentence(),
-            'body' => '<p>'.fake()->paragraph().'</p>',
+            'body' => fake()->paragraphs(3, true),
             'category_id' => Category::factory(),
             'author_id' => User::factory(),
             'is_featured' => false,

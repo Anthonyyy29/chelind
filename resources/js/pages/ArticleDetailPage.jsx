@@ -1,11 +1,118 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import DOMPurify from 'dompurify';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import WhatsappBanner from '../components/WhatsappBanner';
 import { getArticle, getArticles } from '../api/client';
+
+function StatBar({ label, home, away, homeWidth, awayWidth }) {
+    return (
+        <div>
+            <div className="mb-1 flex justify-between text-slate-300">
+                <span className="text-sm font-bold text-white">{home}</span>
+                <span className="text-[10px] tracking-wider text-slate-400 uppercase">
+                    {label}
+                </span>
+                <span className="text-sm font-bold text-white">{away}</span>
+            </div>
+            <div className="flex h-2 w-full overflow-hidden rounded-full bg-slate-700">
+                <div
+                    className="h-full bg-blue-600"
+                    style={{ width: `${homeWidth}%` }}
+                />
+                <div
+                    className="h-full bg-slate-500"
+                    style={{ width: `${awayWidth}%` }}
+                />
+            </div>
+        </div>
+    );
+}
+
+function MatchStatsWidget({ stats }) {
+    const possessionHome = stats.possession_home ?? 50;
+    const possessionAway = stats.possession_away ?? 50;
+
+    const shotsTotal = Math.max(
+        1,
+        (stats.shots_home ?? 0) + (stats.shots_away ?? 0),
+    );
+    const cornersTotal = Math.max(
+        1,
+        (stats.corners_home ?? 0) + (stats.corners_away ?? 0),
+    );
+
+    const goalscorers = stats.goalscorers_text
+        ? stats.goalscorers_text.split('\n').filter(Boolean)
+        : [];
+
+    return (
+        <div className="my-10 rounded-xl border border-white/10 bg-[#18181b] p-6 text-white shadow-2xl sm:p-8">
+            <div className="mb-6 flex items-center justify-between border-b border-white/10 pb-4">
+                <span className="rounded bg-blue-600 px-2.5 py-1 text-[10px] font-bold tracking-wider text-white uppercase">
+                    Statistik Pertandingan
+                </span>
+                {(stats.home_team || stats.away_team) && (
+                    <span className="text-xs font-bold text-slate-300">
+                        {stats.home_team} {stats.home_score}-{stats.away_score}{' '}
+                        {stats.away_team}
+                    </span>
+                )}
+            </div>
+
+            <div className="space-y-4 text-xs font-semibold">
+                <StatBar
+                    label="Penguasaan Bola"
+                    home={`${possessionHome}%`}
+                    away={`${possessionAway}%`}
+                    homeWidth={possessionHome}
+                    awayWidth={possessionAway}
+                />
+                <StatBar
+                    label="Tembakan Tepat Sasaran"
+                    home={stats.shots_home ?? 0}
+                    away={stats.shots_away ?? 0}
+                    homeWidth={((stats.shots_home ?? 0) / shotsTotal) * 100}
+                    awayWidth={((stats.shots_away ?? 0) / shotsTotal) * 100}
+                />
+                <StatBar
+                    label="Akurasi Umpan"
+                    home={`${stats.pass_home ?? 0}%`}
+                    away={`${stats.pass_away ?? 0}%`}
+                    homeWidth={stats.pass_home ?? 0}
+                    awayWidth={stats.pass_away ?? 0}
+                />
+                <StatBar
+                    label="Tendangan Sudut"
+                    home={stats.corners_home ?? 0}
+                    away={stats.corners_away ?? 0}
+                    homeWidth={((stats.corners_home ?? 0) / cornersTotal) * 100}
+                    awayWidth={((stats.corners_away ?? 0) / cornersTotal) * 100}
+                />
+            </div>
+
+            {goalscorers.length > 0 && (
+                <div className="mt-8 space-y-3 border-t border-white/10 pt-6">
+                    <span className="mb-2 block text-[10px] font-bold tracking-wider text-blue-400 uppercase">
+                        Pencetak Gol
+                    </span>
+                    {goalscorers.map((scorer, idx) => (
+                        <div
+                            key={idx}
+                            className="flex items-center gap-3 text-xs"
+                        >
+                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
+                                ⚽
+                            </div>
+                            <p className="font-bold text-white">{scorer}</p>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
 
 export default function ArticleDetailPage() {
     const { slug } = useParams();
@@ -66,6 +173,16 @@ export default function ArticleDetailPage() {
           })
         : '';
 
+    const wordCount = article.body
+        ? article.body.trim().split(/\s+/).length
+        : 0;
+    const readTime = Math.max(1, Math.ceil(wordCount / 200));
+
+    const paragraphs = (article.body || '')
+        .split(/\n\s*\n/)
+        .map((p) => p.trim())
+        .filter(Boolean);
+
     return (
         <div className="min-h-screen bg-[#bebebe] font-poppins text-slate-900 selection:bg-blue-600 selection:text-white">
             <Navbar />
@@ -103,9 +220,11 @@ export default function ArticleDetailPage() {
 
                     <div className="flex flex-wrap items-center gap-4 border-t border-white/15 pt-4 text-xs font-semibold text-slate-300">
                         <span>{publishedDate}</span>
+                        <span>&bull;</span>
+                        <span>{readTime} menit baca</span>
                         {article.author?.name && (
                             <>
-                                <span>•</span>
+                                <span>&bull;</span>
                                 <span className="font-bold text-white">
                                     Oleh {article.author.name}
                                 </span>
@@ -116,12 +235,50 @@ export default function ArticleDetailPage() {
             </section>
 
             <main className="mx-auto max-w-3xl px-4 py-12 leading-relaxed sm:px-6">
-                <div
-                    className="prose prose-slate max-w-none text-sm text-slate-800 sm:text-base [&_h2]:mt-8 [&_h2]:mb-4 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-slate-900 [&_img]:rounded-xl [&_p]:mb-6"
-                    dangerouslySetInnerHTML={{
-                        __html: DOMPurify.sanitize(article.body || ''),
-                    }}
-                />
+                <div className="space-y-6 text-sm text-slate-800 sm:text-base">
+                    {paragraphs.map((paragraph, idx) =>
+                        idx === 0 ? (
+                            <div
+                                key={idx}
+                                className="my-6 border-l-4 border-blue-600 pl-5 text-base leading-relaxed font-medium text-slate-900 sm:text-lg"
+                            >
+                                {paragraph}
+                            </div>
+                        ) : (
+                            <p key={idx}>{paragraph}</p>
+                        ),
+                    )}
+                </div>
+
+                {article.quote && (
+                    <div className="my-8 rounded-xl border-l-4 border-blue-500 bg-[#18181b] p-8 text-white shadow-xl">
+                        <p className="mb-4 text-xl leading-snug font-bold italic sm:text-2xl">
+                            &ldquo;{article.quote.text}&rdquo;
+                        </p>
+                        {article.quote.author && (
+                            <span className="text-xs font-bold tracking-widest text-blue-400 uppercase">
+                                {article.quote.author}
+                            </span>
+                        )}
+                    </div>
+                )}
+
+                {article.match_stats && (
+                    <MatchStatsWidget stats={article.match_stats} />
+                )}
+
+                {article.tags?.length > 0 && (
+                    <div className="flex flex-wrap gap-2 border-b border-slate-400/40 pt-4 pb-8">
+                        {article.tags.map((tag) => (
+                            <span
+                                key={tag}
+                                className="cursor-pointer rounded bg-slate-900 px-3.5 py-1.5 text-[11px] font-bold tracking-wider text-white uppercase transition-colors hover:bg-blue-600"
+                            >
+                                {tag}
+                            </span>
+                        ))}
+                    </div>
+                )}
             </main>
 
             {moreStories.length > 0 && (

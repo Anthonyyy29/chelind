@@ -19,6 +19,10 @@ class Article extends Model
         'slug',
         'excerpt',
         'body',
+        'tags',
+        'quote_text',
+        'quote_author',
+        'match_stats',
         'cover_image',
         'category_id',
         'author_id',
@@ -29,6 +33,8 @@ class Article extends Model
     ];
 
     protected $casts = [
+        'tags' => 'array',
+        'match_stats' => 'array',
         'is_featured' => 'boolean',
         'published_at' => 'datetime',
         'views' => 'integer',

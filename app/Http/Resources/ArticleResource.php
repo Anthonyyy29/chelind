@@ -23,6 +23,12 @@ class ArticleResource extends JsonResource
             'slug' => $article->slug,
             'excerpt' => $article->excerpt,
             'body' => $article->body,
+            'tags' => $article->tags ?? [],
+            'quote' => $article->quote_text ? [
+                'text' => $article->quote_text,
+                'author' => $article->quote_author,
+            ] : null,
+            'match_stats' => $article->match_stats,
             'cover_image' => $article->cover_image ? Storage::disk('public')->url($article->cover_image) : null,
             'category' => new CategoryResource($this->whenLoaded('category')),
             'author' => $this->whenLoaded('author', fn () => [

@@ -7,7 +7,6 @@ use App\Http\Requests\Api\Admin\StoreArticleRequest;
 use App\Http\Requests\Api\Admin\UpdateArticleRequest;
 use App\Http\Resources\ArticleResource;
 use App\Models\Article;
-use App\Support\HtmlSanitizer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Storage;
@@ -28,7 +27,6 @@ class ArticleController extends Controller
         $data = $request->validated();
 
         $data['slug'] = Article::generateUniqueSlug($data['title']);
-        $data['body'] = HtmlSanitizer::clean($data['body']);
         $data['author_id'] = $request->user()->id;
 
         if ($request->hasFile('cover_image')) {
@@ -57,10 +55,6 @@ class ArticleController extends Controller
 
         if (isset($data['title']) && $data['title'] !== $article->title) {
             $data['slug'] = Article::generateUniqueSlug($data['title'], $article->id);
-        }
-
-        if (isset($data['body'])) {
-            $data['body'] = HtmlSanitizer::clean($data['body']);
         }
 
         if ($request->hasFile('cover_image')) {
