@@ -14,15 +14,18 @@ if [ -z "$DOMAIN" ] || [ -z "$EMAIL" ]; then
     exit 1
 fi
 
-DATA_PATH="./docker/certbot"
-DUMMY_PATH="$DATA_PATH/conf/live/$DOMAIN"
+# Path host (buat mkdir sebelum di-mount) vs path di dalam container
+# certbot (sesuai mount "./docker/certbot/conf:/etc/letsencrypt" di
+# docker-compose.prod.yml) — dua-duanya beda, jangan disamain.
+HOST_DUMMY_PATH="./docker/certbot/conf/live/$DOMAIN"
+CONTAINER_DUMMY_PATH="/etc/letsencrypt/live/$DOMAIN"
 
 echo "### Membuat sertifikat dummy untuk $DOMAIN ..."
-mkdir -p "$DUMMY_PATH"
+mkdir -p "$HOST_DUMMY_PATH"
 docker compose -f docker-compose.prod.yml run --rm --entrypoint "\
     openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
-        -keyout '$DUMMY_PATH/privkey.pem' \
-        -out '$DUMMY_PATH/fullchain.pem' \
+        -keyout '$CONTAINER_DUMMY_PATH/privkey.pem' \
+        -out '$CONTAINER_DUMMY_PATH/fullchain.pem' \
         -subj '/CN=localhost'" certbot
 
 echo "### Menyalakan Nginx ..."
