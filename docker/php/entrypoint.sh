@@ -3,7 +3,7 @@ set -e
 
 # Tunggu MySQL siap sebelum migrate (compose "depends_on" cuma nunggu
 # container-nya start, bukan MySQL-nya siap nerima koneksi).
-until php -r "new PDO('mysql:host={$DB_HOST};port={$DB_PORT}', '{$DB_USERNAME}', '{$DB_PASSWORD}');" 2>/dev/null; do
+until php -r "new PDO('mysql:host=$DB_HOST;port=$DB_PORT', '$DB_USERNAME', '$DB_PASSWORD');"; do
     echo "Menunggu database..."
     sleep 2
 done
