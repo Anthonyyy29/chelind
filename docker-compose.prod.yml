@@ -50,8 +50,15 @@ services:
         # Reload tiap 6 jam supaya sertifikat yang baru di-renew certbot
         # (lihat service "certbot" di bawah) otomatis kepakai, tanpa perlu
         # akses Docker socket dari container lain.
+        #
+        # Harus tetap panggil "/docker-entrypoint.sh nginx ..." (bukan langsung
+        # "nginx -g ...") karena entrypoint bawaan image cuma menjalankan proses
+        # templating (envsubst di default.conf.template, isi DOMAIN dkk) kalau
+        # argumen pertamanya persis "nginx" — kalau argumen pertamanya "sh",
+        # entrypoint diam-diam skip templating dan default.conf.template kita
+        # tidak pernah diproses sama sekali.
         command: >
-            sh -c "while true; do sleep 6h; nginx -s reload; done & exec nginx -g 'daemon off;'"
+            sh -c "(while true; do sleep 6h; nginx -s reload; done) & exec /docker-entrypoint.sh nginx -g 'daemon off;'"
 
     # Sertifikat pertama tetap harus diminta manual sekali lewat
     # init-letsencrypt.sh. Service ini yang urus PERPANJANGANNYA — jalan
