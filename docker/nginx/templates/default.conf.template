@@ -1,28 +1,10 @@
-# File ini otomatis diproses oleh image nginx resmi (envsubst) saat
-# container start — ${DOMAIN} diganti dari environment variable DOMAIN
-# yang di-set di docker-compose.prod.yml.
+# Server internal polos (HTTP saja) — container ini TIDAK menghadap internet
+# langsung. SSL, domain, dan routing publik diurus "npm" (Nginx Proxy
+# Manager) yang proxy ke container ini lewat network Docker (nginx:80).
 
 server {
     listen 80;
-    server_name ${DOMAIN};
-
-    # Wajib ada buat certbot minta/renew sertifikat (webroot challenge).
-    location /.well-known/acme-challenge/ {
-        root /var/www/certbot;
-    }
-
-    location / {
-        return 301 https://$host$request_uri;
-    }
-}
-
-server {
-    listen 443 ssl;
-    http2 on;
-    server_name ${DOMAIN};
-
-    ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+    server_name _;
 
     root /var/www/html/public;
     index index.php;

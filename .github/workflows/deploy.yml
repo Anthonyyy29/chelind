@@ -1,0 +1,26 @@
+name: deploy
+
+# Jalan otomatis setelah workflow "tests" di branch main SUKSES.
+# Jadi deploy nggak akan jalan kalau test gagal.
+on:
+  workflow_run:
+    workflows: ['tests']
+    branches: [main]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_DEPLOY_USER }}
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          script: bash /home/deploy/chelind/deploy/scripts/deploy.sh
