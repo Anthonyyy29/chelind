@@ -29,10 +29,10 @@ services:
         networks:
             - chelind
 
-    # Internal-only: TIDAK expose port ke host. Cuma diakses container
-    # "cloudflared" lewat network Docker "chelind" (DNS otomatis by nama
-    # service: nginx:80). SSL & routing publik ditangani Cloudflare Tunnel
-    # di bawah, bukan di sini.
+    # Internal-only: TIDAK expose port ke host. Cuma diakses container "npm"
+    # lewat network Docker "chelind" (DNS otomatis by nama service: nginx:80).
+    # SSL & routing publik sekarang ditangani "npm" (Nginx Proxy Manager) di
+    # bawah, bukan di sini.
     nginx:
         image: nginx:1.27-alpine
         restart: unless-stopped
@@ -45,17 +45,23 @@ services:
         networks:
             - chelind
 
-    # Reverse proxy publik + SSL lewat Cloudflare Tunnel. VPS yang inisiasi
-    # koneksi KELUAR ke Cloudflare — jadi TIDAK ADA port yang perlu dibuka
-    # ke internet sama sekali (lihat deploy/DEPLOY.md untuk setup tunnel-nya
-    # di dashboard Cloudflare: buat tunnel, isi TUNNEL_TOKEN di .env, lalu
-    # arahkan Public Hostname ke "nginx:80").
-    cloudflared:
-        image: cloudflare/cloudflared:latest
+    # Reverse proxy publik + SSL, dikelola lewat UI (bukan certbot manual,
+    # bukan Cloudflare Tunnel — cuma butuh 1 DNS A record biasa ke IP VPS,
+    # nggak perlu kontrol nameserver domain).
+    # UI admin (port 81) SENGAJA di-bind ke 127.0.0.1 saja — tidak pernah
+    # bisa diakses langsung dari internet, biarpun firewall lupa diset.
+    # Akses UI lewat SSH tunnel: ssh -L 8181:localhost:81 user@vps
+    # lalu buka http://localhost:8181 di browser lokal. Lihat deploy/DEPLOY.md.
+    npm:
+        image: jc21/nginx-proxy-manager:latest
         restart: unless-stopped
-        command: tunnel run
-        environment:
-            TUNNEL_TOKEN: '${CLOUDFLARE_TUNNEL_TOKEN}'
+        ports:
+            - '80:80'
+            - '443:443'
+            - '127.0.0.1:81:81'
+        volumes:
+            - npm-data:/data
+            - npm-letsencrypt:/etc/letsencrypt
         networks:
             - chelind
 
@@ -84,3 +90,7 @@ volumes:
     # Ini beneran nyimpen file upload (cover artikel, foto pemain/transfer)
     # — TIDAK di-refresh, harus persist antar deploy.
     storage-data:
+    # Data internal Nginx Proxy Manager: konfigurasi proxy host + sertifikat
+    # Let's Encrypt yang diterbitkan lewat UI-nya. Harus persist antar deploy.
+    npm-data:
+    npm-letsencrypt:

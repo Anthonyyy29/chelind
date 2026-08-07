@@ -1,23 +1,15 @@
 # Deploy Chelind ke VPS
 
 Panduan ini asumsinya VPS Ubuntu fresh install dan kamu punya akses `root`
-(atau `sudo`) lewat SSH. Ikuti urut dari atas — sekali jalan dieksekusi
-manual (di server maupun dashboard Cloudflare), setelah itu deploy
-berikutnya otomatis lewat GitHub Actions (lihat bagian paling bawah).
+(atau `sudo`) lewat SSH. Ikuti urut dari atas — sekali jalan (langkah 1-4)
+dieksekusi manual di server, setelah itu deploy berikutnya otomatis lewat
+GitHub Actions (lihat bagian paling bawah).
 
-## 1. Tambahkan domain ke Cloudflare
+Catatan: setup ini cuma butuh **1 DNS A record biasa** yang ngarah ke IP
+VPS — tidak perlu kontrol nameserver domain (cocok kalau kamu cuma punya
+akses "kelola DNS" tapi bukan pemilik akun registrar).
 
-Lakukan ini paling awal karena ganti nameserver bisa butuh waktu propagasi
-sampai beberapa jam:
-
-1. Bikin akun Cloudflare (gratis) kalau belum punya.
-2. **Add a Site** → masukkan domainmu → pilih plan **Free**.
-3. Cloudflare kasih 2 nameserver baru — ganti nameserver domainmu di
-   pengelola domain (tempat kamu beli domain) ke 2 nameserver itu.
-4. Tunggu sampai status di dashboard Cloudflare berubah jadi "Active"
-   sebelum lanjut ke langkah berikutnya.
-
-## 2. Bootstrap server
+## 1. Bootstrap server
 
 Install Docker Engine dari repo resmi Docker (bukan paket `docker.io` bawaan
 Ubuntu, yang biasa ketinggalan versi):
@@ -36,33 +28,20 @@ sudo usermod -aG docker deploy
 su - deploy
 ```
 
-## 3. Firewall
+## 2. Firewall
 
 ```bash
 sudo ufw allow 22
+sudo ufw allow 80
+sudo ufw allow 443
 sudo ufw enable
 ```
 
-Cukup port `22` (SSH) — web traffic **tidak lewat port yang dibuka di VPS
-sama sekali**. Cloudflare Tunnel (`cloudflared`, disiapkan di langkah 4)
-bikin koneksi KELUAR dari VPS ke Cloudflare, jadi nggak ada yang perlu
-nunggu koneksi masuk dari internet buat port 80/443.
+Port `81` (admin UI Nginx Proxy Manager) **sengaja tidak dibuka** — di
+`docker-compose.prod.yml` port itu sudah di-bind ke `127.0.0.1` saja, jadi
+otomatis tidak bisa diakses dari luar server, dengan atau tanpa firewall.
 
-## 4. Buat Cloudflare Tunnel
-
-Di dashboard Cloudflare (domain yang sama dari langkah 1) → **Zero Trust**
-→ **Networks** → **Tunnels** → **Create a tunnel** → pilih **Cloudflared**
-→ kasih nama (misal `chelind-vps`) → **Save tunnel**.
-
-Di halaman berikutnya ("Install and run a connector"), abaikan command
-install-nya (kita jalanin lewat Docker Compose, bukan install langsung di
-OS) — yang penting cuma **salin Tunnel Token** yang ditampilkan (string
-panjang setelah `--token`). Simpan dulu, dipakai di langkah 5.
-
-Jangan klik "Next" dulu sebelum tunnel-nya benar-benar nyala (lanjut ke
-langkah 6) — "Public Hostname" diisi belakangan di langkah 7.
-
-## 5. Clone repo & siapkan `.env`
+## 3. Clone repo & siapkan `.env`
 
 ```bash
 git clone <url-repo-kamu> /home/deploy/chelind
@@ -83,53 +62,66 @@ Edit `.env`, minimal ubah/isi ini (yang lain boleh ikut default
 | `DB_HOST` | `mysql` (nama service di compose, bukan IP) |
 | `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | isi bebas, dipakai juga oleh service `mysql` di compose |
 | `FOOTBALL_DATA_API_KEY` | API key kamu dari football-data.org, wajib buat scheduler `matches:sync` |
-| `CLOUDFLARE_TUNNEL_TOKEN` | token dari langkah 4 di atas |
 
 `.env` ini cuma hidup di server, **jangan pernah** di-commit ke git.
 
-## 6. Nyalakan semua service
+## 4. Nyalakan semua service
 
 ```bash
 docker compose -f docker-compose.prod.yml up -d --build
 docker compose -f docker-compose.prod.yml ps
 ```
 
-Semua service (`app`, `scheduler`, `nginx`, `cloudflared`, `mysql`) harus
-`running`. Cek migrasi jalan lancar:
+Semua service (`app`, `scheduler`, `nginx`, `npm`, `mysql`) harus `running`.
+Cek migrasi jalan lancar:
 
 ```bash
 docker compose -f docker-compose.prod.yml logs app
 ```
 
-Cek tunnel berhasil konek ke Cloudflare:
+## 5. Arahkan DNS
+
+Di panel DNS domain kamu (Hostinger "Kelola DNS" atau setara), buat/edit
+**A record**:
+
+- Name: `@` (domain utama) — tambah juga `www` kalau perlu
+- Content: IP VPS kamu
+- TTL: default/otomatis
+
+Tunggu sampai propagasi selesai (cek: `dig domainkamu.com` dari mesin lain,
+harus balas IP VPS) sebelum lanjut ke langkah 6 — Let's Encrypt gagal minta
+sertifikat kalau domain belum benar-benar menunjuk ke server ini.
+
+## 6. Setup Nginx Proxy Manager (SSL + domain)
+
+Buka SSH tunnel dari komputer lokalmu ke port admin NPM (port itu tidak
+publik, jadi ini satu-satunya cara akses):
 
 ```bash
-docker compose -f docker-compose.prod.yml logs cloudflared
+ssh -L 8181:localhost:81 deploy@ip-vps-kamu
 ```
 
-Harus ada baris semacam `Registered tunnel connection`. Kalau `cloudflared`
-malah restart terus-menerus, biasanya `CLOUDFLARE_TUNNEL_TOKEN` di `.env`
-salah/kepotong — cek lagi hasil copy dari langkah 4.
+Biarkan terminal itu terbuka, lalu buka `http://localhost:8181` di browser.
 
-## 7. Arahkan domain ke tunnel (Public Hostname)
+1. Login pertama kali pakai kredensial default image:
+   `admin@example.com` / `changeme`.
+2. **Langsung ganti email + password** — ini kredensial publik yang semua
+   orang tahu, target serangan umum kalau sampai bocor kebuka ke internet.
+3. Menu **Proxy Hosts** → **Add Proxy Host**:
+   - Domain Names: `domainkamu.com`
+   - Scheme: `http`
+   - Forward Hostname/IP: `nginx` (nama service internal di compose)
+   - Forward Port: `80`
+4. Tab **SSL**: pilih "Request a new SSL Certificate", centang
+   "Force SSL", isi email, agree ToS, Save.
 
-Balik ke dashboard Cloudflare → Zero Trust → Networks → Tunnels → klik
-tunnel yang tadi dibuat (`chelind-vps`) → tab **Public Hostname** →
-**Add a public hostname**:
+Setelah ini domain kamu sudah HTTPS dan proxy ke app Laravel di dalam
+Docker. Tutup SSH tunnel-nya kalau sudah selesai (`Ctrl+C` di terminal
+tunnel-nya) — tidak perlu terus terbuka.
 
-- Subdomain + Domain: `domainkamu.com` (atau `www` kalau mau subdomain)
-- Type: `HTTP`
-- URL: `nginx:80` (nama service internal di compose, sama persis)
+## 7. Deploy otomatis (GitHub Actions)
 
-Save. Cloudflare otomatis bikin DNS record dan sertifikat SSL publiknya —
-nggak perlu setting DNS manual maupun tunggu Let's Encrypt.
-
-Tes: buka `https://domainkamu.com` di browser, harus langsung nyambung ke
-app Laravel-nya dengan gembok HTTPS valid.
-
-## 8. Deploy otomatis (GitHub Actions)
-
-Setelah langkah 1-7 di atas selesai sekali, deploy berikutnya otomatis lewat
+Setelah langkah 1-6 di atas selesai sekali, deploy berikutnya otomatis lewat
 `.github/workflows/deploy.yml` tiap push ke `main` (setelah test lulus).
 Supaya itu bisa SSH ke server ini, tambahkan 3 secret di
 **GitHub repo → Settings → Secrets and variables → Actions**:
