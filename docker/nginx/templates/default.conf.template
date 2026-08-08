@@ -20,6 +20,12 @@ server {
         fastcgi_index index.php;
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        # Container ini cuma diakses lewat NPM (yang sudah terminate SSL),
+        # tidak pernah langsung dari publik — jadi request yang sampai sini
+        # selalu "sebenarnya" HTTPS meski koneksi NPM->nginx polos HTTP.
+        # Tanpa ini Laravel generate URL asset (Vite) pakai http://, kena
+        # blokir mixed-content oleh browser.
+        fastcgi_param HTTPS on;
     }
 
     location ~ /\.(?!well-known).* {
