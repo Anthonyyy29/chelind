@@ -123,6 +123,9 @@ tunnel-nya) — tidak perlu terus terbuka.
 
 Setelah langkah 1-6 di atas selesai sekali, deploy berikutnya otomatis lewat
 `.github/workflows/deploy.yml` tiap push ke `main` (setelah test lulus).
+Secret sudah disetup (2026-08-08) — commit ini dipakai buat verifikasi
+alurnya: push ke `main` -> `tests` lulus -> `deploy` otomatis SSH ke VPS
+dan `docker compose up -d --build`.
 Supaya itu bisa SSH ke server ini, tambahkan 3 secret di
 **GitHub repo → Settings → Secrets and variables → Actions**:
 
