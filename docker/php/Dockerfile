@@ -41,6 +41,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         php8.5-intl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Paket php8.5-fpm Ubuntu/ondrej default-nya listen ke unix socket
+# (/run/php/php8.5-fpm.sock), tapi nginx (container terpisah) proxy ke
+# app:9000 lewat TCP — override supaya php-fpm listen di TCP 9000.
+RUN sed -i 's|^listen = .*|listen = 9000|' /etc/php/8.5/fpm/pool.d/www.conf
+
 WORKDIR /var/www/html
 
 COPY . .
