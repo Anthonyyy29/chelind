@@ -5,7 +5,7 @@ export default function Hero() {
     return (
         <section
             id="hero"
-            className="relative flex min-h-[75vh] items-center justify-center overflow-hidden px-4 pt-24 pb-16 text-center sm:min-h-[85vh]"
+            className="relative flex min-h-[75vh] items-center justify-center overflow-hidden px-4 pt-24 pb-16 text-center sm:min-h-[85vh] lg:min-h-screen"
         >
             <div
                 className="absolute inset-0 z-0 bg-cover"
