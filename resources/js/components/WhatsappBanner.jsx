@@ -6,7 +6,7 @@ export default function WhatsappBanner() {
         <section
             className="relative flex min-h-[460px] items-center justify-center overflow-hidden border-b-4 border-blue-600 bg-cover bg-no-repeat px-4 py-24 text-center text-white"
             style={{
-                backgroundImage: `linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.45) 100%), url("/assets/news/chelsea.jpg")`,
+                backgroundImage: `linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.45) 100%), url("/assets/HomePage_replacement_img/Join Community.jpg")`,
                 backgroundPosition: 'center 40%',
             }}
         >

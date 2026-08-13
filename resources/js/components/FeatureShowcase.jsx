@@ -7,7 +7,7 @@ export default function FeatureShowcase() {
             <div className="grid min-h-[440px] w-full grid-cols-1 border-b border-slate-400/40 md:min-h-[480px] md:grid-cols-2">
                 <div className="h-[360px] w-full overflow-hidden md:h-full">
                     <img
-                        src="/assets/news/matchday.jpg"
+                        src="/assets/HomePage_replacement_img/Matchday.jpg"
                         alt="Matchday Chelsea"
                         className="h-full w-full object-cover object-center"
                     />
@@ -49,7 +49,7 @@ export default function FeatureShowcase() {
 
                 <div className="order-1 h-[360px] w-full overflow-hidden md:order-2 md:h-full">
                     <img
-                        src="/assets/news/news.jpg"
+                        src="/assets/HomePage_replacement_img/News.jpg"
                         alt="News Chelsea Squad"
                         className="h-full w-full object-cover object-center"
                     />
@@ -59,7 +59,7 @@ export default function FeatureShowcase() {
             <div className="grid min-h-[440px] w-full grid-cols-1 md:min-h-[480px] md:grid-cols-2">
                 <div className="h-[360px] w-full overflow-hidden md:h-full">
                     <img
-                        src="/assets/news/transfer news.jpg"
+                        src="/assets/HomePage_replacement_img/Transfer News.jpg"
                         alt="Transfer News Chelsea"
                         className="h-full w-full object-cover object-center"
                     />
