@@ -27,12 +27,12 @@ export default function Navbar() {
             }`}
         >
             <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-                <Link to="/" className="group flex items-center gap-1">
-                    <span className="text-2xl font-extrabold tracking-tight text-white">
-                        chel
-                        <span className="mx-0.5 inline-block h-2.5 w-2.5 rounded-full bg-blue-500 transition-transform group-hover:scale-125"></span>
-                        indo
-                    </span>
+                <Link to="/" className="group flex items-center">
+                    <img
+                        src="/assets/logo-chelindo-white.png"
+                        alt="Chelindo"
+                        className="h-8 w-auto transition-transform group-hover:scale-105"
+                    />
                 </Link>
 
                 <nav className="hidden items-center gap-8 text-sm font-semibold tracking-wider text-slate-300 md:flex">

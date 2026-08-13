@@ -51,11 +51,11 @@ export default function AdminLoginPage() {
 
             <div className="relative z-10 mx-auto flex w-full max-w-md flex-col items-center text-center">
                 <div className="mb-8">
-                    <span className="flex items-center justify-center text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
-                        chel
-                        <span className="mx-1 inline-block h-4 w-4 rounded-full border-2 border-white bg-transparent"></span>
-                        indo
-                    </span>
+                    <img
+                        src="/assets/logo-chelindo-white.png"
+                        alt="Chelindo"
+                        className="mx-auto h-12 w-auto sm:h-14"
+                    />
                     <span className="mt-2 block text-[11px] font-bold tracking-widest text-blue-300 uppercase">
                         Portal Akses Owner & Admin
                     </span>

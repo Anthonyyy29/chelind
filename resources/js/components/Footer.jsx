@@ -9,11 +9,11 @@ export default function Footer() {
                 <div className="flex flex-col items-start justify-between gap-6 pb-8 sm:flex-row sm:items-center">
                     <div className="space-y-2">
                         <Link to="/" className="inline-block">
-                            <span className="flex items-center gap-0.5 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
-                                chel
-                                <span className="mx-0.5 inline-block h-2.5 w-2.5 rounded-full bg-blue-500"></span>
-                                indo
-                            </span>
+                            <img
+                                src="/assets/logo-chelindo-white.png"
+                                alt="Chelindo"
+                                className="h-8 w-auto sm:h-10"
+                            />
                         </Link>
                         <p className="text-xs font-normal text-slate-300 sm:text-sm">
                             Indonesia's largest Chelsea supporters community.

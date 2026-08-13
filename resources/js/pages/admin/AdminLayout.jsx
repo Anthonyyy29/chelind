@@ -111,13 +111,12 @@ export default function AdminLayout() {
         <div className="flex min-h-screen flex-col bg-[#090d16] font-poppins text-slate-100 selection:bg-blue-600 selection:text-white md:flex-row">
             <aside className="flex w-full shrink-0 flex-col justify-between border-slate-800/60 bg-[#0e1422] p-6 md:h-screen md:w-64 md:border-r">
                 <div>
-                    <div className="mb-8 flex items-center gap-2">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-lg font-black text-white shadow-lg shadow-blue-600/30">
-                            c
-                        </div>
-                        <span className="text-xl font-bold tracking-tight">
-                            chelind
-                        </span>
+                    <div className="mb-8 flex items-center">
+                        <img
+                            src="/assets/logo-chelindo-white.png"
+                            alt="Chelindo"
+                            className="h-7 w-auto"
+                        />
                     </div>
 
                     <span className="mb-3 block px-3 text-[10px] font-extrabold tracking-widest text-slate-400 uppercase">
