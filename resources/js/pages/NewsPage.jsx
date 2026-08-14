@@ -172,10 +172,10 @@ export default function NewsPage() {
                                     <span className="mb-3 inline-block rounded bg-blue-600 px-3 py-1 text-[10px] font-extrabold tracking-wider text-white uppercase shadow">
                                         {featured.category?.name}
                                     </span>
-                                    <h2 className="mb-3 text-2xl leading-tight font-extrabold tracking-tight transition-colors group-hover:text-blue-300 sm:text-4xl">
+                                    <h2 className="mb-2 line-clamp-2 text-xl leading-tight font-extrabold tracking-tight transition-colors group-hover:text-blue-300 sm:mb-3 sm:line-clamp-3 sm:text-4xl">
                                         {featured.title}
                                     </h2>
-                                    <p className="line-clamp-2 text-xs leading-relaxed text-slate-200 sm:text-sm">
+                                    <p className="line-clamp-1 text-xs leading-relaxed text-slate-200 sm:line-clamp-2 sm:text-sm">
                                         {featured.excerpt}
                                     </p>
                                 </div>
