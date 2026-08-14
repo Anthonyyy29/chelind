@@ -17,7 +17,12 @@ export default function NewsPage() {
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
+    const [brokenImages, setBrokenImages] = useState(() => new Set());
     const playersScrollRef = useRef(null);
+
+    const markImageBroken = (key) => {
+        setBrokenImages((prev) => new Set(prev).add(key));
+    };
 
     const scrollPlayers = (direction) => {
         if (!playersScrollRef.current) {
@@ -146,12 +151,22 @@ export default function NewsPage() {
                         to={`/berita/${featured.slug}`}
                         className="group mb-12 block w-full overflow-hidden rounded-2xl border border-slate-300/60 shadow-2xl"
                     >
-                        <div className="relative aspect-[16/9] w-full overflow-hidden sm:aspect-[21/10]">
-                            <img
-                                src={featured.cover_image}
-                                alt={featured.title}
-                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                            />
+                        <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-800 sm:aspect-[21/10]">
+                            {featured.cover_image &&
+                                !brokenImages.has(
+                                    `featured-${featured.id}`,
+                                ) && (
+                                    <img
+                                        src={featured.cover_image}
+                                        alt={featured.title}
+                                        onError={() =>
+                                            markImageBroken(
+                                                `featured-${featured.id}`,
+                                            )
+                                        }
+                                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                    />
+                                )}
                             <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/95 via-black/40 to-transparent p-6 sm:p-10">
                                 <div className="max-w-2xl text-white">
                                     <span className="mb-3 inline-block rounded bg-blue-600 px-3 py-1 text-[10px] font-extrabold tracking-wider text-white uppercase shadow">
@@ -202,13 +217,21 @@ export default function NewsPage() {
                                     className="flex w-44 shrink-0 snap-start flex-col overflow-hidden rounded-xl border border-slate-300/60 bg-white shadow-sm"
                                 >
                                     <div className="aspect-[3/4] overflow-hidden bg-slate-900">
-                                        {player.photo && (
-                                            <img
-                                                src={player.photo}
-                                                alt={player.name}
-                                                className="h-full w-full object-cover"
-                                            />
-                                        )}
+                                        {player.photo &&
+                                            !brokenImages.has(
+                                                `player-${player.id}`,
+                                            ) && (
+                                                <img
+                                                    src={player.photo}
+                                                    alt={player.name}
+                                                    onError={() =>
+                                                        markImageBroken(
+                                                            `player-${player.id}`,
+                                                        )
+                                                    }
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            )}
                                     </div>
                                     <div className="p-3">
                                         <span className="mb-1 block text-[10px] font-bold tracking-wider text-blue-600 uppercase">
@@ -248,11 +271,21 @@ export default function NewsPage() {
                                     className="group flex cursor-pointer flex-col overflow-hidden rounded-xl bg-[#18181b] text-white shadow-lg transition-all duration-300 hover:shadow-2xl"
                                 >
                                     <div className="relative aspect-video overflow-hidden bg-slate-900">
-                                        <img
-                                            src={item.cover_image}
-                                            alt={item.title}
-                                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                        />
+                                        {item.cover_image &&
+                                            !brokenImages.has(
+                                                `grid-${item.id}`,
+                                            ) && (
+                                                <img
+                                                    src={item.cover_image}
+                                                    alt={item.title}
+                                                    onError={() =>
+                                                        markImageBroken(
+                                                            `grid-${item.id}`,
+                                                        )
+                                                    }
+                                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                />
+                                            )}
                                     </div>
                                     <div className="flex flex-1 flex-col p-6">
                                         <div className="mb-2 flex items-center gap-2 text-[10px] font-extrabold text-blue-400 uppercase">

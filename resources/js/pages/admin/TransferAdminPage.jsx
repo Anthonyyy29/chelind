@@ -24,6 +24,7 @@ export default function TransferAdminPage() {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('Semua');
     const [search, setSearch] = useState('');
+    const [brokenPhotoIds, setBrokenPhotoIds] = useState(() => new Set());
 
     const [showModal, setShowModal] = useState(false);
     const [editingId, setEditingId] = useState(null);
@@ -249,10 +250,18 @@ export default function TransferAdminPage() {
                                 className="flex flex-col gap-4 rounded-xl border border-slate-800/60 bg-slate-950/40 p-4 sm:flex-row sm:items-center sm:justify-between"
                             >
                                 <div className="flex items-center gap-4">
-                                    {transfer.photo ? (
+                                    {transfer.photo &&
+                                    !brokenPhotoIds.has(transfer.id) ? (
                                         <img
                                             src={transfer.photo}
                                             alt={transfer.player_name}
+                                            onError={() =>
+                                                setBrokenPhotoIds((prev) =>
+                                                    new Set(prev).add(
+                                                        transfer.id,
+                                                    ),
+                                                )
+                                            }
                                             className="h-12 w-12 shrink-0 rounded-full object-cover"
                                         />
                                     ) : (

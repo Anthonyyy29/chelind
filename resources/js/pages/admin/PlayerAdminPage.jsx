@@ -28,6 +28,7 @@ export default function PlayerAdminPage() {
     const [editingId, setEditingId] = useState(null);
     const [form, setForm] = useState(EMPTY_FORM);
     const [photo, setPhoto] = useState(null);
+    const [brokenPhotoIds, setBrokenPhotoIds] = useState(() => new Set());
     const [errors, setErrors] = useState({});
     const [saving, setSaving] = useState(false);
 
@@ -126,10 +127,15 @@ export default function PlayerAdminPage() {
                         className="flex flex-col overflow-hidden rounded-2xl border border-slate-800/80 bg-[#121929]"
                     >
                         <div className="relative aspect-[3/4] overflow-hidden bg-slate-950">
-                            {player.photo && (
+                            {player.photo && !brokenPhotoIds.has(player.id) && (
                                 <img
                                     src={player.photo}
                                     alt={player.name}
+                                    onError={() =>
+                                        setBrokenPhotoIds((prev) =>
+                                            new Set(prev).add(player.id),
+                                        )
+                                    }
                                     className="h-full w-full object-cover"
                                 />
                             )}

@@ -20,6 +20,7 @@ export default function TransferPage() {
     const [news, setNews] = useState([]);
     const [filter, setFilter] = useState('Semua');
     const [search, setSearch] = useState('');
+    const [brokenPhotoIds, setBrokenPhotoIds] = useState(() => new Set());
 
     useEffect(() => {
         getTransfers()
@@ -160,10 +161,18 @@ export default function TransferPage() {
                                 className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md sm:flex-row sm:items-center sm:justify-between"
                             >
                                 <div className="flex items-center gap-4">
-                                    {transfer.photo ? (
+                                    {transfer.photo &&
+                                    !brokenPhotoIds.has(transfer.id) ? (
                                         <img
                                             src={transfer.photo}
                                             alt={transfer.player_name}
+                                            onError={() =>
+                                                setBrokenPhotoIds((prev) =>
+                                                    new Set(prev).add(
+                                                        transfer.id,
+                                                    ),
+                                                )
+                                            }
                                             className="h-14 w-14 shrink-0 rounded-full object-cover shadow-sm"
                                         />
                                     ) : (

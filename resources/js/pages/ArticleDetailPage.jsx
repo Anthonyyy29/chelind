@@ -120,6 +120,7 @@ export default function ArticleDetailPage() {
     const [article, setArticle] = useState(null);
     const [notFound, setNotFound] = useState(false);
     const [moreStories, setMoreStories] = useState([]);
+    const [brokenImageIds, setBrokenImageIds] = useState(() => new Set());
 
     useEffect(() => {
         setArticle(null);
@@ -303,12 +304,23 @@ export default function ArticleDetailPage() {
                                     key={item.id}
                                     className="group flex cursor-pointer flex-col overflow-hidden rounded-xl bg-[#18181b] text-white shadow-lg transition-all duration-300 hover:shadow-2xl"
                                 >
-                                    <div className="aspect-video overflow-hidden">
-                                        <img
-                                            src={item.cover_image}
-                                            alt={item.title}
-                                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                        />
+                                    <div className="aspect-video overflow-hidden bg-slate-900">
+                                        {item.cover_image &&
+                                            !brokenImageIds.has(item.id) && (
+                                                <img
+                                                    src={item.cover_image}
+                                                    alt={item.title}
+                                                    onError={() =>
+                                                        setBrokenImageIds(
+                                                            (prev) =>
+                                                                new Set(
+                                                                    prev,
+                                                                ).add(item.id),
+                                                        )
+                                                    }
+                                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                />
+                                            )}
                                     </div>
                                     <div className="flex flex-1 flex-col p-6">
                                         <div className="mb-2 flex items-center gap-2 text-[10px] font-bold text-blue-400 uppercase">
