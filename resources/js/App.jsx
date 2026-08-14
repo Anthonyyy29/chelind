@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useLayoutEffect } from 'react';
 import {
     BrowserRouter,
     Navigate,
@@ -24,15 +24,27 @@ import PlayerAdminPage from './pages/admin/PlayerAdminPage';
 import SocialLinkAdminPage from './pages/admin/SocialLinkAdminPage';
 import AccountAdminPage from './pages/admin/AccountAdminPage';
 
+// Matikan scroll restoration bawaan browser — ini yang paling sering
+// bikin auto-scroll-to-top "kalah balapan" khususnya di browser mobile
+// (Safari/Chrome Android), soalnya browser sendiri nyoba restore posisi
+// scroll lama pas navigasi, barengan sama scrollTo manual di bawah.
+if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
+    window.history.scrollRestoration = 'manual';
+}
+
 // React Router SPA tidak me-reset posisi scroll saat pindah route —
 // tanpa ini, halaman baru terbuka di posisi scroll halaman sebelumnya.
 // Pakai location.key (bukan pathname) karena key selalu unik tiap
 // navigasi baru — termasuk klik Link ke path yang sama persis dengan
 // yang sedang aktif, yang mana pathname-nya tidak "berubah" sama sekali.
+// useLayoutEffect (bukan useEffect) supaya scroll di-reset SEBELUM
+// browser sempat paint frame baru — di device mobile yang lebih lambat,
+// useEffect kadang telat sepersekian detik dan sempat kelihatan "kedip"
+// di posisi lama dulu.
 function ScrollToTop() {
     const { key } = useLocation();
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         window.scrollTo(0, 0);
     }, [key]);
 
