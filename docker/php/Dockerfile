@@ -46,6 +46,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # app:9000 lewat TCP — override supaya php-fpm listen di TCP 9000.
 RUN sed -i 's|^listen = .*|listen = 9000|' /etc/php/8.5/fpm/pool.d/www.conf
 
+COPY docker/php/uploads.ini /etc/php/8.5/fpm/conf.d/99-uploads.ini
+
 WORKDIR /var/www/html
 
 COPY . .
