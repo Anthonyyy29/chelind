@@ -1,5 +1,11 @@
-import React from 'react';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import {
+    BrowserRouter,
+    Navigate,
+    Route,
+    Routes,
+    useLocation,
+} from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 import HomePage from './pages/HomePage';
@@ -17,6 +23,18 @@ import TransferAdminPage from './pages/admin/TransferAdminPage';
 import PlayerAdminPage from './pages/admin/PlayerAdminPage';
 import SocialLinkAdminPage from './pages/admin/SocialLinkAdminPage';
 import AccountAdminPage from './pages/admin/AccountAdminPage';
+
+// React Router SPA tidak me-reset posisi scroll saat pindah route —
+// tanpa ini, halaman baru terbuka di posisi scroll halaman sebelumnya.
+function ScrollToTop() {
+    const { pathname } = useLocation();
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pathname]);
+
+    return null;
+}
 
 function AdminEntry() {
     const { user, checking } = useAuth();
@@ -39,6 +57,7 @@ function AdminEntry() {
 export default function App() {
     return (
         <BrowserRouter>
+            <ScrollToTop />
             <AuthProvider>
                 <Routes>
                     <Route path="/" element={<HomePage />} />
