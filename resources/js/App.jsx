@@ -26,12 +26,15 @@ import AccountAdminPage from './pages/admin/AccountAdminPage';
 
 // React Router SPA tidak me-reset posisi scroll saat pindah route —
 // tanpa ini, halaman baru terbuka di posisi scroll halaman sebelumnya.
+// Pakai location.key (bukan pathname) karena key selalu unik tiap
+// navigasi baru — termasuk klik Link ke path yang sama persis dengan
+// yang sedang aktif, yang mana pathname-nya tidak "berubah" sama sekali.
 function ScrollToTop() {
-    const { pathname } = useLocation();
+    const { key } = useLocation();
 
     useEffect(() => {
         window.scrollTo(0, 0);
-    }, [pathname]);
+    }, [key]);
 
     return null;
 }
