@@ -198,16 +198,18 @@ export default function ArticleDetailPage() {
                 />
 
                 <div className="relative z-10 mx-auto w-full max-w-4xl text-white">
-                    <button
-                        onClick={() => navigate('/berita')}
-                        className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold backdrop-blur-md transition-colors hover:bg-white/20"
-                    >
-                        <ArrowLeft className="h-4 w-4" /> Kembali
-                    </button>
+                    <div className="mb-4 flex flex-wrap items-center gap-3">
+                        <button
+                            onClick={() => navigate('/berita')}
+                            className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold backdrop-blur-md transition-colors hover:bg-white/20"
+                        >
+                            <ArrowLeft className="h-4 w-4" /> Kembali
+                        </button>
 
-                    <span className="mb-4 inline-block rounded bg-blue-600 px-3 py-1 text-[11px] font-extrabold tracking-wider text-white uppercase shadow-md">
-                        {article.category?.name}
-                    </span>
+                        <span className="inline-block rounded bg-blue-600 px-3 py-1 text-[11px] font-extrabold tracking-wider text-white uppercase shadow-md">
+                            {article.category?.name}
+                        </span>
+                    </div>
 
                     <h1 className="mb-4 text-3xl leading-tight font-extrabold tracking-tight drop-shadow-md sm:text-5xl md:text-6xl">
                         {article.title}

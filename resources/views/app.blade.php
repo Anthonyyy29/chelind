@@ -12,6 +12,7 @@
             href="https://fonts.bunny.net/css?family=poppins:400,500,600,700,800,900"
             rel="stylesheet"
         />
+        @viteReactRefresh
         @vite(['resources/css/app.css', 'resources/js/main.jsx'])
     </head>
     <body>
