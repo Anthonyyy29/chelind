@@ -150,3 +150,46 @@ docker compose -f docker-compose.prod.yml down             # matikan semua (data
 Ganti versi PHP/dependency: edit `docker/php/Dockerfile` atau
 `composer.json`/`package.json`, commit, push ke `main` — GitHub Actions yang
 build ulang image di server otomatis.
+
+## Alur branch
+
+Kerja & commit sehari-hari di branch `ezra`. Push ke `ezra` **tidak**
+memicu apa pun di production — cuma push/merge ke `main` yang menjalankan
+`tests.yml` lalu (kalau lulus) `deploy.yml`. Jadi alurnya: commit di
+`ezra` → `git push origin ezra` → `git checkout main && git merge ezra
+--no-edit && git push origin main` → balik lagi ke `ezra`.
+
+## Troubleshooting (insiden yang pernah kejadian)
+
+Beberapa masalah yang pernah muncul di production dan cara fixnya —
+berguna kalau gejala yang sama muncul lagi:
+
+- **php-fpm dengar di unix socket, bukan TCP 9000.** Default paket
+  `php-fpm` versi Ubuntu/ondrej begitu, jadi container `nginx` gagal
+  connect ke `app`. Fix: paksa listen TCP lewat `sed` di
+  `docker/php/Dockerfile`.
+- **Mixed-content error di HTTPS** (asset/link ke-generate `http://`
+  padahal situs sudah `https://`). Penyebab: NPM men-terminate SSL lalu
+  forward ke `nginx` internal pakai HTTP polos, jadi Laravel nggak tahu
+  request aslinya HTTPS. Fix: `fastcgi_param HTTPS on;` di config nginx
+  internal (aman karena container itu cuma bisa diakses lewat NPM, tidak
+  publik langsung).
+- **CI (`tests.yml`) sempat silently broken cukup lama** karena step
+  `tsc --noEmit` gagal — project sudah full migrasi dari `.tsx`/Wayfinder
+  ke `.jsx` polos, jadi nggak ada file yang match dan check-nya selalu
+  merah. Karena waktu itu masih sering deploy manual lewat SSH, ini nggak
+  ketahuan sampai lama — akibatnya *setiap* auto-deploy via GitHub Actions
+  ikut ke-block diam-diam. Sudah dihapus dari CI.
+- **`storage/app/public/covers` (atau folder upload lain) ke-buat dengan
+  owner `root:root`** kalau kamu jalanin `artisan`/`db:seed` via
+  `docker compose exec app ...` tanpa flag user — defaultnya root. Karena
+  PHP-FPM jalan sebagai `www-data`, upload jadi silently gagal (response
+  `200 OK` tapi file nggak pernah ke-save). **Selalu tambahkan
+  `-u www-data`** di `docker compose exec`, atau `chown -R
+  www-data:www-data storage/app/public` setelahnya kalau lupa.
+- **Upload foto gagal karena `upload_max_filesize`/`post_max_size`
+  default PHP kekecilan** (2M/8M). Dinaikkan lewat `docker/php/uploads.ini`.
+- **Ganti favicon/asset statis nggak langsung kelihatan** di banyak
+  browser/incognito sekalipun. Fix: tambahkan cache-busting `?v=N` di
+  `href` tag icon (`resources/views/app.blade.php`), naikkan angka `N`
+  tiap kali ganti favicon lagi.
