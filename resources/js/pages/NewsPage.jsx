@@ -103,7 +103,7 @@ export default function NewsPage() {
                 />
                 <div className="relative z-10 mx-auto max-w-4xl px-4 text-white">
                     <span className="mb-2 block text-[11px] font-extrabold tracking-widest text-slate-300 uppercase">
-                        Chelindo Newsroom
+                        Chelind Newsroom
                     </span>
                     <h1 className="text-4xl font-black tracking-tight uppercase drop-shadow-md sm:text-6xl">
                         {activeCategoryName || 'News'}
