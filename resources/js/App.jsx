@@ -23,6 +23,8 @@ import TransferAdminPage from './pages/admin/TransferAdminPage';
 import PlayerAdminPage from './pages/admin/PlayerAdminPage';
 import SocialLinkAdminPage from './pages/admin/SocialLinkAdminPage';
 import AccountAdminPage from './pages/admin/AccountAdminPage';
+import AboutUsPage from './pages/AboutUsPage';
+import MerchPage from './pages/MerchPage';
 
 // Matikan scroll restoration bawaan browser — ini yang paling sering
 // bikin auto-scroll-to-top "kalah balapan" khususnya di browser mobile
@@ -83,6 +85,8 @@ export default function App() {
                     />
                     <Route path="/matchday" element={<MatchdayPage />} />
                     <Route path="/transfer" element={<TransferPage />} />
+                    <Route path="/about-us" element={<AboutUsPage />} />
+                    <Route path="/merch" element={<MerchPage />} />
 
                     <Route path="/admin">
                         <Route index element={<AdminEntry />} />

@@ -6,6 +6,8 @@ const NAV_LINKS = [
     { to: '/berita', label: 'News' },
     { to: '/transfer', label: 'Transfer Rumour' },
     { to: '/matchday', label: 'Matchday' },
+    { to: '/about-us', label: 'About Us' },
+    { to: '/merch', label: 'Merch' },
 ];
 
 export default function Navbar() {
