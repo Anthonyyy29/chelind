@@ -25,6 +25,7 @@ import SocialLinkAdminPage from './pages/admin/SocialLinkAdminPage';
 import AccountAdminPage from './pages/admin/AccountAdminPage';
 import AboutUsPage from './pages/AboutUsPage';
 import MerchPage from './pages/MerchPage';
+import EventPage from './pages/EventPage';
 
 // Matikan scroll restoration bawaan browser — ini yang paling sering
 // bikin auto-scroll-to-top "kalah balapan" khususnya di browser mobile
@@ -87,6 +88,7 @@ export default function App() {
                     <Route path="/transfer" element={<TransferPage />} />
                     <Route path="/about-us" element={<AboutUsPage />} />
                     <Route path="/merch" element={<MerchPage />} />
+                    <Route path="/event" element={<EventPage />} />
 
                     <Route path="/admin">
                         <Route index element={<AdminEntry />} />

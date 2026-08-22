@@ -8,6 +8,7 @@ const NAV_LINKS = [
     { to: '/matchday', label: 'Matchday' },
     { to: '/about-us', label: 'About Us' },
     { to: '/merch', label: 'Merch' },
+    { to: '/event', label: 'Event' },
 ];
 
 export default function Navbar() {
