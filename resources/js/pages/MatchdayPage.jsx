@@ -73,9 +73,8 @@ export default function MatchdayPage() {
                             Jadwal & Hasil Matchday
                         </h1>
                         <p className="max-w-xl text-sm text-slate-300 sm:text-base">
-                            Pantau jadwal pertandingan mendatang dan hasil skor
-                            terbaru Chelsea FC, disinkron otomatis dari
-                            football-data.org.
+                            Pantau jadwal pertandingan Chelsea di Premier League
+                            dan hasil skor terbaru disini.
                         </p>
                     </div>
 
