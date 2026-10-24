@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search } from 'lucide-react';
 import { deleteArticle, getAdminArticles } from '../../api/client';
 
 export default function ArticleListPage() {
     const [articles, setArticles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('Semua');
+    const [search, setSearch] = useState('');
 
     const load = () => {
         setLoading(true);
@@ -26,16 +27,33 @@ export default function ArticleListPage() {
         load();
     };
 
+    const formatDate = (dateString) => {
+        if (!dateString) return '-';
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '-';
+        return date.toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+        });
+    };
+
     const filteredArticles = articles.filter((a) => {
-        if (filter === 'Semua') {
-            return true;
-        }
+        const matchesCategory =
+            filter === 'Semua'
+                ? true
+                : filter === 'Published' || filter === 'Draft'
+                  ? a.status === filter.toLowerCase()
+                  : a.category?.name === filter;
 
-        if (filter === 'Published' || filter === 'Draft') {
-            return a.status === filter.toLowerCase();
-        }
+        const matchesSearch = search.trim()
+            ? a.title?.toLowerCase().includes(search.toLowerCase()) ||
+              (a.author?.name || '')
+                  .toLowerCase()
+                  .includes(search.toLowerCase())
+            : true;
 
-        return a.category?.name === filter;
+        return matchesCategory && matchesSearch;
     });
 
     const categoryNames = [
@@ -84,31 +102,54 @@ export default function ArticleListPage() {
             </div>
 
             <div className="overflow-hidden rounded-2xl border border-slate-800/80 bg-[#121929]">
-                <div className="flex flex-col gap-4 border-b border-slate-800/60 p-6 md:flex-row md:items-center md:justify-between">
-                    <div className="flex flex-wrap items-center gap-2">
-                        {['Semua', 'Published', 'Draft', ...categoryNames].map(
-                            (tab) => (
-                                <button
-                                    key={tab}
-                                    onClick={() => setFilter(tab)}
-                                    className={`rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
-                                        filter === tab
-                                            ? 'bg-blue-600 text-white shadow'
-                                            : 'bg-slate-800/40 text-slate-400 hover:text-white'
-                                    }`}
-                                >
-                                    {tab}
-                                </button>
-                            ),
-                        )}
+                <div className="flex flex-col gap-4 border-b border-slate-800/60 p-6">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="text-base font-bold text-white">
+                                Daftar Artikel
+                            </h3>
+                            <p className="text-xs text-slate-400">
+                                {filteredArticles.length} artikel ditampilkan
+                            </p>
+                        </div>
+                        <Link
+                            to="/admin/artikel/baru"
+                            className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-md transition-all hover:bg-blue-500"
+                        >
+                            <Plus className="h-4 w-4" /> Tulis Artikel
+                        </Link>
                     </div>
 
-                    <Link
-                        to="/admin/artikel/baru"
-                        className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-md transition-all hover:bg-blue-500"
-                    >
-                        <Plus className="h-4 w-4" /> Tulis Artikel Baru
-                    </Link>
+                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                        <div className="flex flex-wrap items-center gap-2">
+                            {['Semua', 'Published', 'Draft', ...categoryNames].map(
+                                (tab) => (
+                                    <button
+                                        key={tab}
+                                        onClick={() => setFilter(tab)}
+                                        className={`rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
+                                            filter === tab
+                                                ? 'bg-blue-600 text-white shadow'
+                                                : 'bg-slate-800/40 text-slate-400 hover:text-white'
+                                        }`}
+                                    >
+                                        {tab}
+                                    </button>
+                                ),
+                            )}
+                        </div>
+
+                        <div className="relative w-full md:w-64">
+                            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                            <input
+                                type="text"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="Cari artikel atau penulis..."
+                                className="w-full rounded-xl border border-slate-800 bg-[#0e1422] py-2 pl-9 pr-3 text-xs text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 <div className="overflow-x-auto">
@@ -117,6 +158,8 @@ export default function ArticleListPage() {
                             <tr>
                                 <th className="p-4">Judul Artikel</th>
                                 <th className="p-4">Kategori</th>
+                                <th className="p-4">Penulis</th>
+                                <th className="p-4">Tanggal Publish</th>
                                 <th className="p-4">Views</th>
                                 <th className="p-4">Status</th>
                                 <th className="p-4 text-right">Aksi</th>
@@ -126,7 +169,7 @@ export default function ArticleListPage() {
                             {loading && (
                                 <tr>
                                     <td
-                                        colSpan={5}
+                                        colSpan={7}
                                         className="p-6 text-center text-slate-500"
                                     >
                                         Memuat...
@@ -136,7 +179,7 @@ export default function ArticleListPage() {
                             {!loading && filteredArticles.length === 0 && (
                                 <tr>
                                     <td
-                                        colSpan={5}
+                                        colSpan={7}
                                         className="p-6 text-center text-slate-500"
                                     >
                                         Belum ada artikel.
@@ -148,16 +191,24 @@ export default function ArticleListPage() {
                                     key={article.id}
                                     className="border-slate-800/60 hover:bg-slate-800/30"
                                 >
-                                    <td className="max-w-sm truncate p-4 text-sm font-bold">
+                                    <td className="max-w-xs truncate p-4 text-sm font-bold text-white sm:max-w-sm">
                                         {article.title}
                                     </td>
                                     <td className="p-4">
                                         <span className="rounded border border-blue-500/30 bg-blue-500/15 px-2 py-0.5 text-[10px] font-extrabold text-blue-400 uppercase">
-                                            {article.category?.name}
+                                            {article.category?.name || '-'}
                                         </span>
                                     </td>
+                                    <td className="p-4 text-slate-300">
+                                        {article.author?.name || 'Admin Chelind'}
+                                    </td>
+                                    <td className="p-4 text-slate-400">
+                                        {article.published_at
+                                            ? formatDate(article.published_at)
+                                            : '-'}
+                                    </td>
                                     <td className="p-4 font-mono text-slate-400">
-                                        {article.views}
+                                        {article.views?.toLocaleString('id-ID') ?? 0}
                                     </td>
                                     <td className="p-4">
                                         <span
