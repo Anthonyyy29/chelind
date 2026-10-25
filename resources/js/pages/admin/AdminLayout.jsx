@@ -172,8 +172,8 @@ export default function AdminLayout() {
                 </div>
             </aside>
 
-            <div className="flex min-w-0 flex-1 flex-col h-full overflow-hidden">
-                <header className="shrink-0 flex items-center justify-between border-b border-slate-800/60 bg-[#090d16] px-6 py-5 sm:px-8 z-10">
+            <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
+                <header className="z-10 flex shrink-0 items-center justify-between border-b border-slate-800/60 bg-[#090d16] px-6 py-5 sm:px-8">
                     <div>
                         <h1 className="text-xl font-black tracking-tight sm:text-2xl">
                             {meta.title}
@@ -191,7 +191,7 @@ export default function AdminLayout() {
                     </Link>
                 </header>
 
-                <main className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-8">
+                <main className="flex-1 space-y-8 overflow-y-auto p-6 sm:p-8">
                     <Outlet />
                 </main>
             </div>

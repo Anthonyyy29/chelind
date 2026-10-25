@@ -122,31 +122,34 @@ export default function ArticleListPage() {
 
                     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                         <div className="flex flex-wrap items-center gap-2">
-                            {['Semua', 'Published', 'Draft', ...categoryNames].map(
-                                (tab) => (
-                                    <button
-                                        key={tab}
-                                        onClick={() => setFilter(tab)}
-                                        className={`rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
-                                            filter === tab
-                                                ? 'bg-blue-600 text-white shadow'
-                                                : 'bg-slate-800/40 text-slate-400 hover:text-white'
-                                        }`}
-                                    >
-                                        {tab}
-                                    </button>
-                                ),
-                            )}
+                            {[
+                                'Semua',
+                                'Published',
+                                'Draft',
+                                ...categoryNames,
+                            ].map((tab) => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setFilter(tab)}
+                                    className={`rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
+                                        filter === tab
+                                            ? 'bg-blue-600 text-white shadow'
+                                            : 'bg-slate-800/40 text-slate-400 hover:text-white'
+                                    }`}
+                                >
+                                    {tab}
+                                </button>
+                            ))}
                         </div>
 
                         <div className="relative w-full md:w-64">
-                            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                            <Search className="absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
                             <input
                                 type="text"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 placeholder="Cari artikel atau penulis..."
-                                className="w-full rounded-xl border border-slate-800 bg-[#0e1422] py-2 pl-9 pr-3 text-xs text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+                                className="w-full rounded-xl border border-slate-800 bg-[#0e1422] py-2 pr-3 pl-9 text-xs text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
                             />
                         </div>
                     </div>
@@ -200,7 +203,8 @@ export default function ArticleListPage() {
                                         </span>
                                     </td>
                                     <td className="p-4 text-slate-300">
-                                        {article.author?.name || 'Admin Chelind'}
+                                        {article.author?.name ||
+                                            'Admin Chelind'}
                                     </td>
                                     <td className="p-4 text-slate-400">
                                         {article.published_at
@@ -208,7 +212,9 @@ export default function ArticleListPage() {
                                             : '-'}
                                     </td>
                                     <td className="p-4 font-mono text-slate-400">
-                                        {article.views?.toLocaleString('id-ID') ?? 0}
+                                        {article.views?.toLocaleString(
+                                            'id-ID',
+                                        ) ?? 0}
                                     </td>
                                     <td className="p-4">
                                         <span
